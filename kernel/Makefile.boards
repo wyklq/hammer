@@ -1,0 +1,9 @@
+boards = $(shell ../scripts/list-boards.sh $(HW_ARCH))
+build_boards = $(patsubst %,board-%,$(boards))
+
+all: $(build_boards)
+
+$(build_boards): board-%:
+	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$* depend
+	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$*
+

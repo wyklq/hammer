@@ -1,0 +1,43 @@
+#
+# This file is part of the HAMMER build system.
+#
+# Copyright (C) 2012-2013 Aaro Koskinen <aaro.koskinen@iki.fi>
+#
+# Licensed under the GNU General Public License version 2 (GPLv2).
+#
+
+# Do the architecture specific setup.
+SETUP_TARGET=$BASEDIR/config/$HW_ARCH/setup
+if [ -n "$HW_ARCH" -a -f $SETUP_TARGET ]
+then
+        . "$SETUP_TARGET"
+else
+        echo "$0: invalid/unknown target: $HW_ARCH"
+        exit 1
+fi
+SETUP_BOARD=$BASEDIR/config/$HW_ARCH/$HW_BOARD/setup
+if [ -f $SETUP_BOARD ]
+then
+	. "$SETUP_BOARD"
+fi
+#
+if [ "$HW_ARCH" != "host" ]
+then
+	#
+	# File names:
+	#
+	if [ -n "$KERNEL_DTB_APPEND" ]
+	then
+		IMAGE_KERNEL="`basename "$LINUX_BINARY"`"
+		UIMAGE_KERNEL="uimage-kernel"
+	else
+		IMAGE_KERNEL="$HW_BOARD-`basename "$LINUX_BINARY"`"
+		UIMAGE_KERNEL="$HW_BOARD-uimage-kernel"
+	fi
+	IMAGE_INITRAMFS="$HW_BOARD-initramfs"
+	UIMAGE_INITRAMFS="$HW_BOARD-uimage-initramfs"
+	#
+	# Export the global variables.
+	#
+	export TOOL_TRIPLET
+fi

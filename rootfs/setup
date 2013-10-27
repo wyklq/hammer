@@ -1,0 +1,12 @@
+. ../scripts/setup
+BUILD_ROOTFS="$BASEDIR/work/$HW_ARCH/rootfs/$TOOL_TRIPLET"
+BUILD_NATIVE="/usr/src/rootfs"
+export AR="${TOOL_TRIPLET}-ar"
+export NM="${TOOL_TRIPLET}-nm"
+export AR="${TOOL_TRIPLET}-ar"
+export LD="${TOOL_TRIPLET}-ld --sysroot=$BUILD_ROOTFS"
+export CC="${TOOL_TRIPLET}-gcc --sysroot=$BUILD_ROOTFS"
+export CXX="${TOOL_TRIPLET}-g++ --sysroot=$BUILD_ROOTFS"
+export RANLIB="${TOOL_TRIPLET}-ranlib"
+export STRIP="${TOOL_TRIPLET}-strip"
+export OBJCOPY="${TOOL_TRIPLET}-objcopy"

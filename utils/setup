@@ -1,0 +1,2 @@
+. ../scripts/setup
+export STRIP=strip

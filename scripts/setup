@@ -1,0 +1,413 @@
+#
+# This file is part of the HAMMER build system.
+#
+# Copyright (C) 2012-2013 Aaro Koskinen <aaro.koskinen@iki.fi>
+#
+# Licensed under the GNU General Public License version 2 (GPLv2).
+#
+
+set -x
+set -e
+
+BASEDIR=`cd $(dirname $0)/.. && pwd`
+
+pkg_patch ()
+{
+	PATCH_DIR="$BASEDIR/upstream/$PKG_NAME"
+	PATCH_DIR=`echo $PATCH_DIR | sed 's/-$//'`
+	if [ ! -d "$PATCH_DIR" ]
+	then
+		return
+	fi
+	cd "$1"
+	PATCH_DIRS=$PATCH_DIR
+	if [ -n "$PKG_VERSION" -a -d "$PATCH_DIR/$PKG_VERSION" ]
+	then
+		PATCH_DIRS="$PATCH_DIR/$PKG_VERSION $PATCH_DIRS"
+	fi
+	for D in $PATCH_DIRS
+	do
+		for P in `ls $D/*.patch | sort`
+		do
+			patch -p1 < $P
+		done
+	done
+}
+
+_pkg_info ()
+{
+	PKG_DATA=`cat $BASEDIR/upstream/packages | \
+			awk ' { if ($1 == "'$P'") { print $0; exit } } '`
+	if [ -z "$PKG_DATA" ]
+	then
+		echo "$0: upstream location of package $P missing"
+		exit 1
+	fi
+	PKG_URL=`echo $PKG_DATA | awk ' { print $2 } '`
+	PKG_TYPE=`echo $PKG_DATA | awk ' { print $3 } '`
+	PKG_INFO=`echo $PKG_DATA | awk ' { print $4 } '`
+}
+
+_pkg_git_verify ()
+{
+	if ! git diff --quiet "$PKG_INFO..$PKG_VERSION"
+	then
+		echo "$0: $PKG_VERSION missing/corrupted in $PKG_GIT"
+		return 1
+	fi
+	git push . "+${PKG_VERSION}~0:refs/heads/${PKG_BUILD_NAME}los.git"
+}
+
+_pkg_fetch ()
+{
+	_pkg_info
+	mkdir -p "$BASEDIR/work/pkg"
+	if [ "$PKG_TYPE" = "git" ]
+	then
+		git clone --bare "$PKG_URL" "$PKG_GIT" || rm -rf "$PKG_GIT"
+		(cd "$PKG_GIT"; _pkg_git_verify) || rm -rf "$PKG_GIT"
+	elif [ "$PKG_TYPE" = "www" ]
+	then
+		(cd $BASEDIR/work/pkg; curl -L -O "$PKG_URL")
+		if [ -n "$PKG_INFO" ]
+		then
+			PKG_INFO=`echo $PKG_INFO | awk ' { gsub("%", "'$P'"); print $0 } '`
+			(cd $BASEDIR/work/pkg; mv `basename $PKG_URL` $PKG_INFO)
+		fi
+	fi
+}
+
+pkg_source ()
+{
+	if [ -d "$PKG_GIT" ]
+	then
+		PKG_SOURCE="git"
+		return
+	fi
+	for EXT in tar.gz tgz tar.bz2 tar.xz
+	do
+		if [ -f "$1.$EXT" ]
+		then
+			PKG_SOURCE="$1.$EXT"
+			return
+		fi
+	done
+	PKG_SOURCE=""
+}
+
+pkg_download ()
+{
+	P=$PKG
+	if [ ! -r "$BASEDIR/upstream/packages" ]
+	then
+		return
+	fi
+	if [ -z "$PKG" ]
+	then
+		echo "$0: PKG not defined"
+		exit 1
+	fi
+	exec 9<"$BASEDIR/upstream/packages"
+	flock -x 9
+	pkg_source "$BASEDIR/work/pkg/$P"
+	if [ -z "$PKG_SOURCE" ]
+	then
+		_pkg_fetch $P
+	fi
+	exec 9<&-
+	pkg_source "$BASEDIR/work/pkg/$P"
+	if [ -z "$PKG_SOURCE" ]
+	then
+		echo "$0: package missing: $P"
+		exit 1
+	fi
+}
+
+_pkg_unpack ()
+{
+	pkg_source "$BASEDIR/work/pkg/$P"
+	if [ -z "$PKG_SOURCE" ]
+	then
+		echo "$0: package missing: $P"
+		exit 1
+	elif [ "$PKG_SOURCE" = "git" ]
+	then
+		true
+	elif (echo $PKG_SOURCE | grep -q '\.tar.gz$')
+	then
+		UNPACK="gunzip -c"
+	elif (echo $PKG_SOURCE | grep -q '\.tgz$')
+	then
+		UNPACK="gunzip -c"
+	elif (echo $PKG_SOURCE | grep -q '\.tar.bz2$')
+	then
+		UNPACK="bunzip2 -c"
+	elif (echo $PKG_SOURCE | grep -q '\.tar.xz$')
+	then
+		UNPACK="unxz -c"
+	else
+		echo "$0: unknown package format: $PKG_SOURCE"
+		exit 1
+	fi
+	if [ "$PKG_SOURCE" != "git" -a ! -r "$PKG_SOURCE" ]
+	then
+		echo "$0: cannot read package: $PKG_SOURCE"
+		exit 1
+	fi
+	if [ $P = $PKG ]
+	then
+		test -d "$PKG_UNPACK" && rm -rf "$PKG_UNPACK"
+		test -d $PKG_DIR-build && rm -rf $PKG_DIR-build
+		if [ -n "$PKG_STAGING" ]
+		then
+			test -d "$PKG_STAGING" && rm -rf "$PKG_STAGING"
+			mkdir -p "$PKG_STAGING"
+		else
+			echo "$0: no staging directory specified"
+			exit 1
+		fi
+		mkdir -p $PKG_DIR-build
+		mkdir -p "$PKG_UNPACK"
+		if "$PKG_FLAT"
+		then
+			cd "$PKG_UNPACK"
+		else
+			cd "$PKG_UNPACK/.."
+		fi
+	else
+		cd "$PKG_UNPACK"
+	fi
+	if [ "$PKG_SOURCE" = "git" ]
+	then
+		if ! (cd "$PKG_GIT"; git show -s --oneline "$PKG_VERSION")
+		then
+			_pkg_info
+			(cd "$PKG_GIT"; git fetch "$PKG_URL";
+			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
+		fi
+		if ! ((cd "$PKG_GIT"; git archive --format=tar --prefix="$P/" \
+		      "$PKG_VERSION") | tar xf -)
+		then
+			echo "$0: could not export $PKG_VERSION from $PKG_GIT"
+			exit 1
+		fi
+	elif ! ($UNPACK $PKG_SOURCE | tar xf -)
+	then
+		echo "$0: could not unpack $PKG_SOURCE"
+		exit 1
+	fi
+	pkg_patch "$PKG_UNPACK"
+}
+
+pkg_unpack_real ()
+{
+	if [ -z "$PKG_DIR" ]
+	then
+		echo "$0: PKG_DIR not defined"
+		exit 1
+	fi
+	PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
+	PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
+	pkg_download
+	PKG_UNPACK="$PKG_DIR"
+	_pkg_unpack
+}
+
+pkg_unpack ()
+{
+	PKG_FLAT=false
+	pkg_unpack_real
+}
+
+pkg_unpack_flat ()
+{
+	PKG_FLAT=true
+	pkg_unpack_real
+}
+
+pkg_unpack_shared ()
+{
+	PKG_FLAT=false
+	if [ -z "$PKG" ]
+	then
+		echo "$0: PKG not defined"
+		exit 1
+	elif [ -z "$PKG_SHARED" ]
+	then
+		echo "$0: PKG_SHARED not defined"
+		exit 1
+	fi
+	PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
+	PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
+	pkg_download
+	mkdir -p "$BASEDIR/work/shared"
+	COUNTER="$BASEDIR/work/shared/.$PKG.count"
+	touch "$COUNTER"
+	touch "$COUNTER.lock"
+	exec 9<"$COUNTER.lock"
+	flock -x 9
+	COUNT=`cat "$COUNTER"`
+	if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ]
+	then
+		exec 9<&-
+		test -d $PKG_DIR-build && rm -rf $PKG_DIR-build
+		if [ -n "$PKG_STAGING" ]
+		then
+			test -d "$PKG_STAGING" && rm -rf "$PKG_STAGING"
+			mkdir -p "$PKG_STAGING"
+		else
+			echo "$0: no staging directory specified"
+			exit 1
+		fi
+		mkdir -p "$PKG_DIR-build"
+		return
+	fi
+	PKG_UNPACK="$PKG_SHARED"
+	_pkg_unpack
+	echo 1 > "$COUNTER"
+	exec 9<&-
+}
+
+pkg_install ()
+{
+	TARGET_DIR="$1"
+	shift
+	if [ -z "$TARGET_DIR" ]
+	then
+		echo "$0: target dir not specified"
+		exit 1
+	elif [ -z "$PKG_STAGING" ]
+	then
+		echo "$0: no staging directory specified"
+		exit 1
+	fi
+	SUBTARGET="$1"
+	if [ -n "$SUBTARGET" ]
+	then
+		shift
+		SUBTARGET="-$SUBTARGET"
+		DIRS=$*
+	else
+		DIRS="/"
+	fi
+	mkdir -p "$TARGET_DIR"
+	rm -f "$PKG_STAGING/.files"
+	touch "$PKG_STAGING/.files"
+	for D in $DIRS
+	do
+		"$BASEDIR/scripts/strip_tree.sh" "$PKG_STAGING/$D/$STRIP_BASE"
+		(cd "$PKG_STAGING"; \
+			find ./$D -type f -o -type l | \
+			sed 's/^\.\/\/*//' | \
+			grep -v '^\.files$' >> .files)
+	done
+	(cd "$PKG_STAGING"; tar cf - -T .files) | (cd "$TARGET_DIR"; tar xfp -)
+	mv "$PKG_STAGING/.files" \
+		"$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
+	touch "$PKG_STAGING/../.modified"
+}
+
+pkg_replace ()
+{
+	REPLACE_DIR=`echo $1|sed 's/\/*$//'`
+	if [ -z "$REPLACE_DIR" ]
+	then
+		echo "$0: target dir not specified"
+		exit 1
+	fi
+	REPLACE_NEW="$REPLACE_DIR.new"
+	REPLACE_OLD="$REPLACE_DIR.old"
+	pkg_install "$REPLACE_NEW"
+	if [ -d "$REPLACE_DIR" ]
+	then
+		mv "$REPLACE_DIR" "$REPLACE_OLD"
+	fi
+	mv "$REPLACE_NEW" "$REPLACE_DIR"
+	if [ -d "$REPLACE_OLD" ]
+	then
+		rm -rf "$REPLACE_OLD"
+	fi
+}
+
+pkg_dummy ()
+{
+	if [ -z "$PKG_STAGING" ]
+	then
+		echo "$0: no staging directory specified"
+		exit 1
+	fi
+	DIR=`dirname "$PKG_STAGING"`
+	mkdir -p $DIR
+	touch "$DIR/${PKG_BUILD_NAME}files"
+}
+
+pkg_cleanup ()
+{
+	if [ -n "$PKG" -a -n "$PKG_DIR" -a -d "$PKG_DIR" ]
+	then
+		cd $PKG_DIR/..
+		rm -rf $PKG
+		rm -rf $PKG-build
+	fi
+	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
+	then
+		rm -rf "$PKG_STAGING"
+	fi
+	return 0
+}
+
+pkg_cleanup_shared ()
+{
+	if [ -n "$PKG" -a -n "$PKG_DIR" -a -d "$PKG_DIR-build" ]
+	then
+		cd "$PKG_DIR-build/.."
+		rm -rf "$PKG-build"
+	fi
+	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
+	then
+		rm -rf "$PKG_STAGING"
+	fi
+}
+
+INITRAMFS_COMPRESS=lzma
+
+if [ -r $BASEDIR/config/setup ]
+then
+	. $BASEDIR/config/setup
+fi
+
+PKG_NAME_FIXED=$(echo "$PKG_NAME"|sed 's/\.$/-/')
+PKG_NAME_FIXED=$(echo "$PKG_NAME_FIXED"|sed 's/[^-]$/&-/')
+
+if [ -z "$PKG_BUILD_NAME" ]
+then
+	PKG_BUILD_NAME="$PKG_NAME_FIXED"
+fi
+
+PKG_STAGING=""
+if [ -n "$PKG_NAME" ]
+then
+	if [ -z "$PKG_VERSION" ]
+	then
+		echo "$0: package version missing: $PKG_BUILD_NAME"
+		exit 1
+	fi
+	PKG=$PKG_NAME$PKG_VERSION
+	PKG_DIR="$BASEDIR/work/$HW_ARCH$PKG_DIR_ADD/$PKG"
+	PKG_SHARED="$BASEDIR/work/shared/$PKG"
+	PKG_STAGING="$BASEDIR/work/$HW_ARCH/$BUILD_SUBSYSTEM/build/${PKG_BUILD_NAME}pkg"
+fi
+
+export BUILD_TOOLCHAIN=$BASEDIR/work/$HW_ARCH/toolchain
+BUILD_UTILS=$BASEDIR/work/host/utils
+export PATH="$BUILD_TOOLCHAIN/bin:$BUILD_UTILS/bin:$PATH"
+
+BUILD_INITRAMFS=$BASEDIR/work/$HW_ARCH/initramfs/$TOOL_TRIPLET
+BUILD_KERNEL=$BASEDIR/work/$HW_ARCH/kernel-$HW_BOARD
+BUILD_IMAGES=$BASEDIR/work
+
+export MAKEFLAGS
+export LINUX_BINARY
+export WEAK_DEPS
+
+. ../scripts/setup.local
