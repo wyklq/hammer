@@ -55,7 +55,7 @@ _pkg_git_verify ()
 		echo "$0: $PKG_VERSION missing/corrupted in $PKG_GIT"
 		return 1
 	fi
-	git push . "+${PKG_VERSION}~0:refs/heads/${PKG_BUILD_NAME}los.git"
+	git push . "+${PKG_VERSION}~0:refs/heads/${PKG_BUILD_NAME}hammer.git"
 }
 
 _pkg_fetch ()
