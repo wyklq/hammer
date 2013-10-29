@@ -69,11 +69,21 @@ _pkg_fetch ()
 		(cd "$PKG_GIT"; _pkg_git_verify) || rm -rf "$PKG_GIT"
 	elif [ "$PKG_TYPE" = "www" ]
 	then
-		(cd $BASEDIR/work/pkg; curl -L -O "$PKG_URL")
+		PKG_LOCAL_NAME=`basename $PKG_URL`
+		(
+			cd $BASEDIR/work/pkg
+			curl -L -o ".$PKG_LOCAL_NAME" "$PKG_URL"
+		 	MD5SUM=`md5sum "$BASEDIR/work/pkg/.$PKG_LOCAL_NAME" | \
+				awk ' { print $1 } '`
+			if [ "$MD5SUM" = "$PKG_HASH" ]
+			then
+				mv ".$PKG_LOCAL_NAME" "$PKG_LOCAL_NAME"
+			fi
+		)
 		if [ -n "$PKG_INFO" ]
 		then
 			PKG_INFO=`echo $PKG_INFO | awk ' { gsub("%", "'$P'"); print $0 } '`
-			(cd $BASEDIR/work/pkg; mv `basename $PKG_URL` $PKG_INFO)
+			(cd $BASEDIR/work/pkg; mv "$PKG_LOCAL_NAME" "$PKG_INFO")
 		fi
 	fi
 }
