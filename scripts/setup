@@ -47,6 +47,21 @@ _pkg_info ()
 	PKG_TYPE=`echo $PKG_DATA | awk ' { print $3 } '`
 	PKG_HASH=`echo $PKG_DATA | awk ' { print $4 } '`
 	PKG_INFO=`echo $PKG_DATA | awk ' { print $5 } '`
+	if ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
+	then
+		if [ "$PKG_TYPE" = "git" ]
+		then
+			URL_BASE="$PKG_GIT_BASE"
+		else
+			URL_BASE="$PKG_WWW_BASE"
+		fi
+		if [ -z "$URL_BASE" ]
+		then
+			echo "URL base for $PKG_TYPE package $P missing."
+			exit 1
+		fi
+		PKG_URL="$URL_BASE$PKG_URL"
+	fi
 }
 
 _pkg_git_verify ()
