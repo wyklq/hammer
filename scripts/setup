@@ -9,6 +9,8 @@
 set -x
 set -e
 
+test -r "$HOME/.hammerconfig" && . "$HOME/.hammerconfig"
+
 BASEDIR=`cd $(dirname $0)/.. && pwd`
 
 pkg_patch ()
