@@ -185,7 +185,6 @@ _pkg_unpack ()
 	if [ $P = $PKG ]
 	then
 		test -d "$PKG_UNPACK" && rm -rf "$PKG_UNPACK"
-		test -d $PKG_DIR-build && rm -rf $PKG_DIR-build
 		if [ -n "$PKG_STAGING" ]
 		then
 			test -d "$PKG_STAGING" && rm -rf "$PKG_STAGING"
@@ -194,7 +193,6 @@ _pkg_unpack ()
 			echo "$0: no staging directory specified"
 			exit 1
 		fi
-		mkdir -p $PKG_DIR-build
 		mkdir -p "$PKG_UNPACK"
 		if "$PKG_FLAT"
 		then
@@ -297,6 +295,8 @@ pkg_unpack_shared ()
 	_pkg_unpack
 	echo 1 > "$COUNTER"
 	exec 9<&-
+	test -d "$PKG_DIR-build" && rm -rf "$PKG_DIR-build"
+	mkdir -p "$PKG_DIR-build"
 	cd "$PKG_DIR-build"
 }
 
@@ -379,7 +379,6 @@ pkg_cleanup ()
 	then
 		cd $PKG_DIR/..
 		rm -rf $PKG
-		rm -rf $PKG-build
 	fi
 	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
 	then
