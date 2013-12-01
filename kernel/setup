@@ -1,2 +1,2 @@
-PKG_DIR_ADD="/$HW_BOARD"
+PKG_DIR_ADD="/kernel-$HW_BOARD"
 . ../scripts/setup
