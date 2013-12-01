@@ -245,12 +245,14 @@ pkg_unpack ()
 {
 	PKG_FLAT=false
 	pkg_unpack_real
+	cd "$PKG_DIR"
 }
 
 pkg_unpack_flat ()
 {
 	PKG_FLAT=true
 	pkg_unpack_real
+	cd "$PKG_DIR"
 }
 
 pkg_unpack_shared ()
@@ -288,12 +290,14 @@ pkg_unpack_shared ()
 			exit 1
 		fi
 		mkdir -p "$PKG_DIR-build"
+		cd "$PKG_DIR-build"
 		return
 	fi
 	PKG_UNPACK="$PKG_SHARED"
 	_pkg_unpack
 	echo 1 > "$COUNTER"
 	exec 9<&-
+	cd "$PKG_DIR-build"
 }
 
 pkg_install ()
