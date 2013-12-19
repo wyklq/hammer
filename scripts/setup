@@ -9,6 +9,9 @@
 set -x
 set -e
 
+export SHELL=/bin/sh
+export LC_ALL=C
+
 test -r "$HOME/.hammerconfig" && . "$HOME/.hammerconfig"
 
 BASEDIR=`cd $(dirname $0)/.. && pwd`
