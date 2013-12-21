@@ -1,5 +1,5 @@
 . ../scripts/setup
-BUILD_ROOTFS="$BASEDIR/work/$HW_ARCH/rootfs/$TOOL_TRIPLET"
+BUILD_ROOTFS="$BUILD_BASE/rootfs/$TOOL_TRIPLET"
 BUILD_NATIVE="/usr/src/rootfs"
 export AR="${TOOL_TRIPLET}-ar"
 export NM="${TOOL_TRIPLET}-nm"

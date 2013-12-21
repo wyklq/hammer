@@ -15,6 +15,7 @@ export LC_ALL=C
 test -r "$HOME/.hammerconfig" && . "$HOME/.hammerconfig"
 
 BASEDIR=`cd $(dirname $0)/.. && pwd`
+export BUILD_BASE="$BASEDIR/work/$HW_ARCH"
 
 pkg_patch ()
 {
@@ -427,17 +428,17 @@ then
 		exit 1
 	fi
 	PKG=$PKG_NAME$PKG_VERSION
-	PKG_DIR="$BASEDIR/work/$HW_ARCH$PKG_DIR_ADD/$PKG"
+	PKG_DIR="$BUILD_BASE$PKG_DIR_ADD/$PKG"
 	PKG_SHARED="$BASEDIR/work/shared/$PKG"
-	PKG_STAGING="$BASEDIR/work/$HW_ARCH/$BUILD_SUBSYSTEM/build/${PKG_BUILD_NAME}pkg"
+	PKG_STAGING="$BUILD_BASE/$BUILD_SUBSYSTEM/build/${PKG_BUILD_NAME}pkg"
 fi
 
-export BUILD_TOOLCHAIN=$BASEDIR/work/$HW_ARCH/toolchain
+export BUILD_TOOLCHAIN="$BUILD_BASE/toolchain"
 BUILD_UTILS=$BASEDIR/work/host/utils
 export PATH="$BUILD_TOOLCHAIN/bin:$BUILD_UTILS/bin:$PATH"
 
-BUILD_INITRAMFS=$BASEDIR/work/$HW_ARCH/initramfs/$TOOL_TRIPLET
-BUILD_KERNEL=$BASEDIR/work/$HW_ARCH/kernel-$HW_BOARD
+BUILD_INITRAMFS="$BUILD_BASE/initramfs/$TOOL_TRIPLET"
+BUILD_KERNEL="$BUILD_BASE/kernel-$HW_BOARD"
 BUILD_IMAGES=$BASEDIR/work
 
 LIB_NAME=${LIB_NAME:-lib}
