@@ -1,7 +1,7 @@
 #
 # This file is part of the HAMMER build system.
 #
-# Copyright (C) 2012-2013 Aaro Koskinen <aaro.koskinen@iki.fi>
+# Copyright (C) 2012-2014 Aaro Koskinen <aaro.koskinen@iki.fi>
 #
 # Licensed under the GNU General Public License version 2 (GPLv2).
 #
@@ -331,7 +331,7 @@ pkg_install ()
 	touch "$PKG_STAGING/.files"
 	for D in $DIRS
 	do
-		"$BASEDIR/scripts/strip_tree.sh" "$PKG_STAGING/$D/$STRIP_BASE"
+		"$BASEDIR/scripts/strip_tree.pl" "$PKG_STAGING/$D/$STRIP_BASE"
 		(cd "$PKG_STAGING"; \
 			find ./$D -type f -o -type l | \
 			sed 's/^\.\/\/*//' | \

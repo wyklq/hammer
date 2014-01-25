@@ -9,7 +9,6 @@
 include Makefile.packages
 
 packages += buildhost
-packages += iself
 packages += prepare
 
 override HW_ARCH = host
