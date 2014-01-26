@@ -404,6 +404,36 @@ pkg_cleanup_shared ()
 	fi
 }
 
+pkg_native_pre ()
+{
+	PKG_SCRIPT="$PKG_STAGING/$BUILD_NATIVE/native/build-$PKG_NAME.sh"
+	PKG_SCRIPT=$(echo "$PKG_SCRIPT" | sed 's/-\.sh$/.sh/')
+	pkg_download
+	rm -rf "$PKG_STAGING"
+	mkdir -p "$PKG_STAGING/$BUILD_NATIVE/native"
+	echo "#!/bin/sh" > "$PKG_SCRIPT"
+	[ -n "$*" ] && echo "# dependencies: $*" >> "$PKG_SCRIPT"
+	cat << EOF >> "$PKG_SCRIPT"
+
+set -e
+
+PKG_NAME=$PKG_NAME
+PKG_VERSION=$PKG_VERSION
+
+. ./setup
+
+EOF
+}
+
+pkg_native_post ()
+{
+	chmod 755 "$PKG_SCRIPT"
+	mkdir -p "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
+	install -p -m 644 "$PKG_SOURCE" "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
+	pkg_install "$BUILD_ROOTFS"
+	pkg_cleanup
+}
+
 INITRAMFS_COMPRESS=lzma
 
 if [ -r $BASEDIR/config/setup ]
