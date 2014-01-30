@@ -406,7 +406,7 @@ pkg_cleanup_shared ()
 
 pkg_native_pre ()
 {
-	PKG_SCRIPT="$PKG_STAGING/$BUILD_NATIVE/native/build-$PKG_NAME.sh"
+	PKG_SCRIPT="$PKG_STAGING/$BUILD_NATIVE/native/build-$PKG_BUILD_NAME.sh"
 	PKG_SCRIPT=$(echo "$PKG_SCRIPT" | sed 's/-\.sh$/.sh/')
 	pkg_download
 	rm -rf "$PKG_STAGING"
