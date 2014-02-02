@@ -31,7 +31,7 @@ create_dir($debug_dir) if length $obj_copy;
  
 sub strip_tree {
 	my $f = $File::Find::name;
-	return if /\.([aho]|exec|img|image|mod|module)$/;
+	return if /\.([aho]|exec|img|image|ko|mod|module)$/;
 	$f =~ s/^.\///;
 	next if $f =~ /^usr\/lib\/debug\//;
 	my $target_debug = "$debug_dir/$f.debug";
