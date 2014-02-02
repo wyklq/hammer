@@ -93,7 +93,7 @@ _pkg_fetch ()
 		PKG_LOCAL_NAME=`basename $PKG_URL`
 		(
 			cd $BASEDIR/work/pkg
-			curl -L -o ".$PKG_LOCAL_NAME" "$PKG_URL"
+			curl -L -k -o ".$PKG_LOCAL_NAME" "$PKG_URL"
 		 	MD5SUM=`md5sum "$BASEDIR/work/pkg/.$PKG_LOCAL_NAME" | \
 				awk ' { print $1 } '`
 			if [ "$MD5SUM" = "$PKG_HASH" ]
