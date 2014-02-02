@@ -77,8 +77,11 @@ sub strip_tree {
 			chmod 0600, $f or die("$0: chmod($f): $!\n");
 		}
 		system($strip, '-p', $f) == 0 or die("$0: $strip($f): $?\n");
-		system($obj_copy, '-p', "--add-gnu-debuglink=$target_debug", $f)
-			== 0 or die("$0: $obj_copy($f): $?\n");
+		if (length $obj_copy) {
+			system($obj_copy, '-p',
+			       "--add-gnu-debuglink=$target_debug", $f) == 0 or
+				die("$0: $obj_copy($f): $?\n");
+		}
 		if ($read_only) {
 			chmod $perm, $f or die("$0: chmod($f): $!\n");
 		}
