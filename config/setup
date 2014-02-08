@@ -26,14 +26,8 @@ then
 	#
 	# File names:
 	#
-	if [ -n "$KERNEL_DTB_APPEND" ]
-	then
-		IMAGE_KERNEL="`basename "$LINUX_BINARY"`"
-		UIMAGE_KERNEL="uimage-kernel"
-	else
-		IMAGE_KERNEL="$HW_BOARD-`basename "$LINUX_BINARY"`"
-		UIMAGE_KERNEL="$HW_BOARD-uimage-kernel"
-	fi
+	IMAGE_KERNEL="$HW_BOARD-`basename "$LINUX_BINARY"`"
+	UIMAGE_KERNEL="$HW_BOARD-uimage-kernel"
 	IMAGE_INITRAMFS="$HW_BOARD-initramfs"
 	UIMAGE_INITRAMFS="$HW_BOARD-uimage-initramfs"
 	#
