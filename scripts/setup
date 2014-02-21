@@ -474,6 +474,7 @@ BUILD_IMAGES=$BASEDIR/work
 
 LIB_NAME=${LIB_NAME:-lib}
 
+export LIB_NAME
 export MAKEFLAGS
 export LINUX_BINARY
 export WEAK_DEPS

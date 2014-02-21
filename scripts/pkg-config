@@ -1,0 +1,14 @@
+#!/bin/sh
+#
+# This file is part of the HAMMER build system.
+#
+# Copyright (C) 2014 Aaro Koskinen <aaro.koskinen@iki.fi>
+#
+# Licensed under the GNU General Public License version 2 (GPLv2).
+#
+
+export PKG_CONFIG_DIR=""
+export PKG_CONFIG_LIBDIR="${BUILD_SYSROOT}/usr/$LIB_NAME/pkgconfig:${BUILD_SYSROOT}/usr/share/pkgconfig"
+export PKG_CONFIG_SYSROOT_DIR="${BUILD_SYSROOT}"
+
+exec pkg-config "$@"
