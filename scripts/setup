@@ -372,9 +372,11 @@ pkg_dummy ()
 
 pkg_cleanup ()
 {
-	if [ -n "$PKG_UNPACK" -a -d "$PKG_UNPACK" ]
+	if [ -d "$PKG_DIR-build" ]
 	then
-		rm -rf "$PKG_UNPACK"
+		rm -rf "$PKG_DIR-build"
+	else
+		rm -rf "$PKG_DIR"
 	fi
 	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
 	then
@@ -385,14 +387,7 @@ pkg_cleanup ()
 
 pkg_cleanup_shared ()
 {
-	if [ -n "$PKG" -a -n "$PKG_DIR" -a -d "$PKG_DIR-build" ]
-	then
-		rm -rf "$PKG_DIR-build"
-	fi
-	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
-	then
-		rm -rf "$PKG_STAGING"
-	fi
+	pkg_cleanup
 }
 
 pkg_native_pre ()
