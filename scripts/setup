@@ -198,15 +198,8 @@ _pkg_unpack ()
 			exit 1
 		fi
 		mkdir -p "$PKG_UNPACK"
-		if "$PKG_FLAT"
-		then
-			cd "$PKG_UNPACK"
-		else
-			cd "$PKG_UNPACK/.."
-		fi
-	else
-		cd "$PKG_UNPACK"
 	fi
+	cd "$PKG_UNPACK"
 	if [ "$PKG_SOURCE" = "git" ]
 	then
 		if ! (cd "$PKG_GIT"; git show -s --oneline "$PKG_VERSION")
@@ -215,13 +208,13 @@ _pkg_unpack ()
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
 			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
 		fi
-		if ! ((cd "$PKG_GIT"; git archive --format=tar --prefix="$P/" \
+		if ! ((cd "$PKG_GIT"; git archive --format=tar --prefix=./ \
 		      "$PKG_VERSION") | tar xf -)
 		then
 			echo "$0: could not export $PKG_VERSION from $PKG_GIT"
 			exit 1
 		fi
-	elif ! ($UNPACK $PKG_SOURCE | tar xf -)
+	elif ! ($UNPACK $PKG_SOURCE | tar xf - $PKG_FLAT)
 	then
 		echo "$0: could not unpack $PKG_SOURCE"
 		exit 1
@@ -245,21 +238,21 @@ pkg_unpack_real ()
 
 pkg_unpack ()
 {
-	PKG_FLAT=false
+	PKG_FLAT="--strip-components=1"
 	pkg_unpack_real
 	cd "$PKG_DIR"
 }
 
 pkg_unpack_flat ()
 {
-	PKG_FLAT=true
+	PKG_FLAT=""
 	pkg_unpack_real
 	cd "$PKG_DIR"
 }
 
 pkg_unpack_shared ()
 {
-	PKG_FLAT=false
+	PKG_FLAT="--strip-components=1"
 	if [ -z "$PKG" ]
 	then
 		echo "$0: PKG not defined"
@@ -379,10 +372,9 @@ pkg_dummy ()
 
 pkg_cleanup ()
 {
-	if [ -n "$PKG" -a -n "$PKG_DIR" -a -d "$PKG_DIR" ]
+	if [ -n "$PKG_UNPACK" -a -d "$PKG_UNPACK" ]
 	then
-		cd $PKG_DIR/..
-		rm -rf $PKG
+		rm -rf "$PKG_UNPACK"
 	fi
 	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
 	then
@@ -395,8 +387,7 @@ pkg_cleanup_shared ()
 {
 	if [ -n "$PKG" -a -n "$PKG_DIR" -a -d "$PKG_DIR-build" ]
 	then
-		cd "$PKG_DIR-build/.."
-		rm -rf "$PKG-build"
+		rm -rf "$PKG_DIR-build"
 	fi
 	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
 	then
@@ -459,7 +450,7 @@ then
 		exit 1
 	fi
 	PKG=$PKG_NAME$PKG_VERSION
-	PKG_DIR="$BUILD_BASE$PKG_DIR_ADD/$PKG"
+	PKG_DIR="$BUILD_BASE$PKG_DIR_ADD/$PKG_BUILD_NAME$PKG_VERSION"
 	PKG_SHARED="$BASEDIR/work/shared/$PKG"
 	PKG_STAGING="$BUILD_BASE/$BUILD_SUBSYSTEM/build/${PKG_BUILD_NAME}pkg"
 fi
