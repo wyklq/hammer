@@ -29,9 +29,6 @@ then
 	else 
 		SUBSYSDEP="../work/$HW_ARCH/$BUILD_DEPENDS/build/.modified"
 	fi
-elif [ "$BUILD_SUBSYSTEM" = "native" ]
-then
-	SUBSYSDEP="/.rootfs-files"
 fi
 
 PREPARE=0
