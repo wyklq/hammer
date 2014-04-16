@@ -428,7 +428,7 @@ then
 	. $BASEDIR/config/setup
 fi
 
-PKG_NAME_FIXED=$(echo "$PKG_NAME"|sed 's/\.$/-/')
+PKG_NAME_FIXED=$(echo "$PKG_NAME"|sed 's/[_.]$/-/')
 PKG_NAME_FIXED=$(echo "$PKG_NAME_FIXED"|sed 's/[^-]$/&-/')
 
 if [ -z "$PKG_BUILD_NAME" ]
