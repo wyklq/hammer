@@ -2,7 +2,7 @@
 #
 # This file is part of the HAMMER build system.
 #
-# Copyright (C) 2012-2013 Aaro Koskinen <aaro.koskinen@iki.fi>
+# Copyright (C) 2012-2014 Aaro Koskinen <aaro.koskinen@iki.fi>
 #
 # Licensed under the GNU General Public License version 2 (GPLv2).
 #
@@ -62,6 +62,12 @@ do
 	then
 		DEPS="../upstream/$PKG/* $DEPS"
 		PDEPS="../upstream/$PKG/* $PDEPS"
+	fi
+	PKG_SOURCES=$(echo "$PKG" | sed 's/-/_/g')_sources
+	if (printenv $PKG_SOURCES > /dev/null)
+	then
+		DEPS="../work/${PKG}-sources-build $DEPS"
+		DUMMY="../work/${PKG}-sources-build $DUMMY"
 	fi
 	if (printenv ${PKG}_git >/dev/null)
 	then

@@ -229,11 +229,17 @@ pkg_unpack_real ()
 		echo "$0: PKG_DIR not defined"
 		exit 1
 	fi
-	PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
-	PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
-	pkg_download
-	PKG_UNPACK="$PKG_DIR"
-	_pkg_unpack
+	if [ -d "$PKG_SOURCES" ]
+	then
+		rm -rf "$PKG_DIR"
+		cp -pr "$PKG_SOURCES" "$PKG_DIR"
+	else
+		PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
+		PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
+		pkg_download
+		PKG_UNPACK="$PKG_DIR"
+		_pkg_unpack
+	fi
 }
 
 pkg_unpack ()
@@ -250,7 +256,7 @@ pkg_unpack_flat ()
 	cd "$PKG_DIR"
 }
 
-pkg_unpack_shared ()
+_pkg_unpack_shared ()
 {
 	PKG_FLAT="--strip-components=1"
 	if [ -z "$PKG" ]
@@ -292,6 +298,16 @@ pkg_unpack_shared ()
 	_pkg_unpack
 	echo 1 > "$COUNTER"
 	exec 9<&-
+}
+
+pkg_unpack_shared ()
+{
+	if [ -d "$PKG_SOURCES" ]
+	then
+		PKG_SHARED="$PKG_SOURCES"
+	else
+		_pkg_unpack_shared
+	fi
 	test -d "$PKG_DIR-build" && rm -rf "$PKG_DIR-build"
 	mkdir -p "$PKG_DIR-build"
 	cd "$PKG_DIR-build"
@@ -430,6 +446,9 @@ fi
 
 PKG_NAME_FIXED=$(echo "$PKG_NAME"|sed 's/[_.]$/-/')
 PKG_NAME_FIXED=$(echo "$PKG_NAME_FIXED"|sed 's/[^-]$/&-/')
+
+PKG_SOURCES=$(echo "$PKG_NAME_FIXED" | sed 's/-$//;s/-/_/g')_sources
+PKG_SOURCES=$(printenv $PKG_SOURCES || true)
 
 if [ -z "$PKG_BUILD_NAME" ]
 then
