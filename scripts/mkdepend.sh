@@ -69,11 +69,6 @@ do
 		DEPS="../work/${PKG}-sources-build $DEPS"
 		DUMMY="../work/${PKG}-sources-build $DUMMY"
 	fi
-	if (printenv ${PKG}_git >/dev/null)
-	then
-		DEPS="../work/${PKG}-git-build $DEPS"
-		DUMMY="../work/${PKG}-git-build $DUMMY"
-	fi
 	DD=""
 	for D in $DEPS
 	do
