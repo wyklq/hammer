@@ -1,0 +1,19 @@
+
+             hammer.git - The extremely simple HAMMER build system
+
+                           Technical Reference Guide
+
+          Copyright (C) 2012-2014 Aaro Koskinen <aaro.koskinen@iki.fi>
+
+        Licensed under the GNU General Public License version 2 (GPLv2).
+
+
+    INTRODUCTION
+    ------------
+    hammer.git provides simple scripts and tools for building a complete Linux
+    distribution. The idea is that you pull this stuff into your project and
+    the zero-length files are hooks (the supported interface) that you are
+    supposed to modify.
+
+    At this time, there is no more documentation available, sorry.
+
