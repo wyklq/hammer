@@ -63,8 +63,8 @@ do
 		DEPS="../upstream/$PKG/* $DEPS"
 		PDEPS="../upstream/$PKG/* $PDEPS"
 	fi
-	PKG_SOURCES=$(echo "$PKG" | sed 's/-/_/g')_sources
-	if (printenv $PKG_SOURCES > /dev/null)
+	PKG_FORCE=$(echo "$PKG" | sed 's/-/_/g')_force
+	if (printenv $PKG_FORCE > /dev/null)
 	then
 		DEPS="../work/${PKG}-sources-build $DEPS"
 		DUMMY="../work/${PKG}-sources-build $DUMMY"
