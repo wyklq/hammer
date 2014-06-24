@@ -15,5 +15,32 @@
     the zero-length files are hooks (the supported interface) that you are
     supposed to modify.
 
+
+    ENVIRONMENT
+    -----------
+    Some magic enviroment variables:
+
+        WEAK_DEPS
+            When set to "1", strict dependency rules between subsystems are
+            bypassed and a clean build within a subsystem is not enforced
+            when some build script is modified. This is mainly useful when
+            developing & build-testing a newly added package to avoid a
+            complete rebuild of everything. Using this option may result in
+            some stale files remaining whenever the content of some package
+            changes, and generally results in a nonreproducible build.
+
+        <package name>_force
+            When set, forces a rebuild of a single package. This is mainly
+            useful only together with "<package name>_sources" variable.
+
+        <package name>_sources
+            Specifies a directory that overrides a package source code from
+            the content defined in upstream/packages. This is mainly useful
+            when developing new patches against a package (by modifying its
+            source tree) or when trying out a new version of a package or
+            while bisecting a package etc. Using this option very likely
+            results in a nonreproducible build.
+
+
     At this time, there is no more documentation available, sorry.
 
