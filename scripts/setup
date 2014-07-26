@@ -99,6 +99,8 @@ _pkg_fetch ()
 			if [ "$MD5SUM" = "$PKG_HASH" ]
 			then
 				mv ".$PKG_LOCAL_NAME" "$PKG_LOCAL_NAME"
+			else
+				rm -f ".$PKG_LOCAL_NAME"
 			fi
 		)
 		if [ -n "$PKG_INFO" ]
