@@ -41,7 +41,8 @@ do
 	fi
 done
 
-PDEPS="Makefile Makefile.packages"
+PDEPS="Makefile Makefile.packages setup ../Makefile ../config/setup"
+PDEPS="$PDEPS ../scripts/*"
 
 for SCRIPT in $*
 do
