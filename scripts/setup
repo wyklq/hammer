@@ -78,12 +78,12 @@ _pkg_info ()
 
 _pkg_git_verify ()
 {
-	if ! git diff --quiet "$PKG_SHA1..$PKG_VERSION"
+	if ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
+	      "$PKG_VERSION^{commit}")
 	then
 		echo "$0: $PKG_VERSION missing/corrupted in $PKG_GIT"
 		return 1
 	fi
-	git push . "+${PKG_VERSION}~0:refs/heads/${PKG_BUILD_NAME}hammer.git"
 }
 
 _pkg_fetch ()
@@ -92,7 +92,7 @@ _pkg_fetch ()
 	if [ "$PKG_TYPE" = "git" ]
 	then
 		git clone --bare "$PKG_URL" "$PKG_GIT" || rm -rf "$PKG_GIT"
-		(cd "$PKG_GIT"; _pkg_git_verify) || rm -rf "$PKG_GIT"
+		_pkg_git_verify || rm -rf "$PKG_GIT"
 	elif [ "$PKG_TYPE" = "www" ]
 	then
 		curl -L -k -o "$PKG_SOURCE.tmp" "$PKG_URL"
@@ -144,8 +144,7 @@ pkg_download ()
 		if [ ! -d "$PKG_GIT" ]
 		then
 			_pkg_fetch $P
-		elif ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
-			"$PKG_VERSION^{commit}")
+		elif ! _pkg_git_verify
 		then
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
 			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
