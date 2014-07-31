@@ -95,7 +95,6 @@ _pkg_fetch ()
 		(cd "$PKG_GIT"; _pkg_git_verify) || rm -rf "$PKG_GIT"
 	elif [ "$PKG_TYPE" = "www" ]
 	then
-		PKG_FILENAME=`basename $PKG_URL`
 		(
 			cd $BASEDIR/work/pkg
 			curl -L -k -o ".$PKG_FILENAME" "$PKG_URL"
@@ -142,6 +141,10 @@ pkg_download ()
 		return
 	fi
 	_pkg_info
+	if [ -z "$PKG_FILENAME" ]
+	then
+		PKG_FILENAME=`basename "$PKG_URL"`
+	fi
 	if [ -z "$PKG" ]
 	then
 		echo "$0: PKG not defined"
