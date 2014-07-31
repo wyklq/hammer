@@ -82,7 +82,6 @@ _pkg_git_verify ()
 
 _pkg_fetch ()
 {
-	_pkg_info
 	mkdir -p "$BASEDIR/work/pkg"
 	if [ "$PKG_TYPE" = "git" ]
 	then
@@ -136,6 +135,7 @@ pkg_download ()
 	then
 		return
 	fi
+	_pkg_info
 	if [ -z "$PKG" ]
 	then
 		echo "$0: PKG not defined"
@@ -154,7 +154,6 @@ pkg_download ()
 		if ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
 			"$PKG_VERSION^{commit}")
 		then
-			_pkg_info
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
 			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
 		fi
