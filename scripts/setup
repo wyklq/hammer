@@ -147,6 +147,16 @@ pkg_download ()
 	if [ -z "$PKG_SOURCE" ]
 	then
 		_pkg_fetch $P
+	elif [ "$PKG_SOURCE" = "git" ]
+	then
+		PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
+		PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
+		if ! (cd "$PKG_GIT"; git show -s --oneline "$PKG_VERSION")
+		then
+			_pkg_info
+			(cd "$PKG_GIT"; git fetch "$PKG_URL";
+			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
+		fi
 	fi
 	exec 9<&-
 	pkg_source "$BASEDIR/work/pkg/$P"
@@ -204,12 +214,6 @@ _pkg_unpack ()
 	cd "$PKG_UNPACK"
 	if [ "$PKG_SOURCE" = "git" ]
 	then
-		if ! (cd "$PKG_GIT"; git show -s --oneline "$PKG_VERSION")
-		then
-			_pkg_info
-			(cd "$PKG_GIT"; git fetch "$PKG_URL";
-			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
-		fi
 		if ! ((cd "$PKG_GIT"; git archive --format=tar --prefix=./ \
 		      "$PKG_VERSION") | tar xf -)
 		then
@@ -236,8 +240,6 @@ pkg_unpack_real ()
 		rm -rf "$PKG_DIR"
 		cp -pr "$PKG_SOURCES" "$PKG_DIR"
 	else
-		PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
-		PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
 		pkg_download
 		PKG_UNPACK="$PKG_DIR"
 		_pkg_unpack
@@ -270,8 +272,6 @@ _pkg_unpack_shared ()
 		echo "$0: PKG_SHARED not defined"
 		exit 1
 	fi
-	PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
-	PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
 	pkg_download
 	mkdir -p "$BASEDIR/work/shared"
 	COUNTER="$BASEDIR/work/shared/.$PKG.count"
