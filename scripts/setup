@@ -151,7 +151,8 @@ pkg_download ()
 	then
 		PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
 		PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
-		if ! (cd "$PKG_GIT"; git show -s --oneline "$PKG_VERSION")
+		if ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
+			"$PKG_VERSION^{commit}")
 		then
 			_pkg_info
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
