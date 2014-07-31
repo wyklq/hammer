@@ -137,11 +137,14 @@ pkg_download ()
 	fi
 	exec 9<"$BASEDIR/upstream/packages"
 	flock -x 9
+	PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
+	PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
 	if [ "$PKG_TYPE" = "git" ]
 	then
-		PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
-		PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
-		if ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
+		if [ ! -d "$PKG_GIT" ]
+		then
+			_pkg_fetch $P
+		elif ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
 			"$PKG_VERSION^{commit}")
 		then
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
@@ -470,3 +473,12 @@ export LINUX_BINARY
 export WEAK_DEPS
 
 . ../scripts/setup.local
+
+if [ "$1" = "download" ]
+then
+	if [ "$PKG_VERSION" != "NONE" ]
+	then
+		pkg_download
+	fi
+	exit 0
+fi
