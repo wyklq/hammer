@@ -1,7 +1,7 @@
 #
 # This file is part of the HAMMER build system.
 #
-# Copyright (C) 2012-2013 Aaro Koskinen <aaro.koskinen@iki.fi>
+# Copyright (C) 2012-2014 Aaro Koskinen <aaro.koskinen@iki.fi>
 #
 # Licensed under the GNU General Public License version 2 (GPLv2).
 #
@@ -14,12 +14,18 @@ ifndef BUILD_SUBSYSTEM
    $(error BUILD_SUBSYSTEM not specified.)
 endif
 
+dl_targets    = $(patsubst %, ../work/$(HW_ARCH)/$(BUILD_SUBSYSTEM)/build/%-dl, $(packages))
 fake_targets  = $(patsubst %, ../work/$(HW_ARCH)/$(BUILD_SUBSYSTEM)/build/%-files, $(packages))
 build_scripts = $(patsubst %, build-%.sh, $(packages))
 
 all: ../work/.dependencies.$(HW_ARCH)-$(BUILD_SUBSYSTEM) $(fake_targets)
 
 depend: ../work/.dependencies.$(HW_ARCH)-$(BUILD_SUBSYSTEM)
+
+download: $(dl_targets)
+
+$(dl_targets): ../work/$(HW_ARCH)/$(BUILD_SUBSYSTEM)/build/%-dl: build-%.sh
+	+@BUILD_SUBSYSTEM=$(BUILD_SUBSYSTEM) FAKE_TARGET=$@ HW_ARCH=$(HW_ARCH) MAKEFLAGS="$(MAKEFLAGS)" ../scripts/do_download.sh ./$<
 
 $(fake_targets): ../work/$(HW_ARCH)/$(BUILD_SUBSYSTEM)/build/%-files: build-%.sh
 	+@BUILD_SUBSYSTEM=$(BUILD_SUBSYSTEM) FAKE_TARGET=$@ HW_ARCH=$(HW_ARCH) MAKEFLAGS="$(MAKEFLAGS)" ../scripts/do_build.sh ./$<

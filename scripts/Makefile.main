@@ -1,7 +1,7 @@
 #
 # This file is part of the HAMMER build system.
 #
-# Copyright (C) 2012-2013 Aaro Koskinen <aaro.koskinen@iki.fi>
+# Copyright (C) 2012-2014 Aaro Koskinen <aaro.koskinen@iki.fi>
 #
 # Licensed under the GNU General Public License version 2 (GPLv2).
 #
@@ -12,6 +12,7 @@ cross_archs = $(patsubst %,cross-%,$(archs))
 initramfs_archs = $(patsubst %,initramfs-%,$(archs))
 _rootfs_archs = $(shell scripts/list-archs.sh -r)
 rootfs_archs = $(patsubst %,rootfs-%,$(_rootfs_archs))
+dl_archs = $(patsubst %, dl-%, $(archs))
 
 MAKEFLAGS += --no-print-directory
 
@@ -19,11 +20,18 @@ all: help
 
 help:
 	@echo "Makefile targets:"
+	@echo "   download   ... Download all source packages"
 	@echo "   boards     ... Build all boards"
 	@echo "   toolchain  ... Build all cross-compilation toolchains"
 	@echo "   rootfs     ... Build all root file systems"
 	@echo "   utils      ... Build all host utilities"
 	@echo "   initramfs  ... Build all initramfs file systems"
+
+$(dl_archs): dl-%:
+	@$(MAKE) -C toolchain HW_ARCH=$* download
+	@$(MAKE) -C initramfs HW_ARCH=$* download
+	@$(MAKE) -C rootfs HW_ARCH=$* download
+	@$(MAKE) -C kernel -f Makefile.boards HW_ARCH=$* download
 
 $(board_archs): board-%:
 	@$(MAKE) -C kernel -f Makefile.boards HW_ARCH=$*
@@ -68,6 +76,12 @@ _rootfs: $(rootfs_archs)
 rootfs::
 	@$(MAKE) initramfs
 	@$(MAKE) _rootfs
+
+_download: $(dl_archs)
+
+download::
+	@$(MAKE) -C utils download
+	@$(MAKE) _download
 
 clean_shared:
 	@(test -d work || mkdir work)

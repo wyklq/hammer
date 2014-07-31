@@ -1,9 +1,14 @@
 boards = $(shell ../scripts/list-boards.sh $(HW_ARCH))
 build_boards = $(patsubst %,board-%,$(boards))
+dl_boards = $(patsubst %, dl-%, $(boards))
 
 all: $(build_boards)
+
+download: $(dl_boards)
 
 $(build_boards): board-%:
 	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$* depend
 	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$*
 
+$(dl_boards): dl-%:
+	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$* download
