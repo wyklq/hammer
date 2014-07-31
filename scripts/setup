@@ -95,42 +95,15 @@ _pkg_fetch ()
 		(cd "$PKG_GIT"; _pkg_git_verify) || rm -rf "$PKG_GIT"
 	elif [ "$PKG_TYPE" = "www" ]
 	then
-		(
-			cd $BASEDIR/work/pkg
-			curl -L -k -o ".$PKG_FILENAME" "$PKG_URL"
-			MD5SUM=`md5sum "$BASEDIR/work/pkg/.$PKG_FILENAME" | \
-				awk ' { print $1 } '`
-			if [ "$MD5SUM" = "$PKG_MD5" ]
-			then
-				mv ".$PKG_FILENAME" "$PKG_FILENAME"
-			else
-				rm -f ".$PKG_FILENAME"
-			fi
-		)
-		if [ -n "$PKG_INFO" ]
+		curl -L -k -o "$PKG_SOURCE.tmp" "$PKG_URL"
+		MD5SUM=`md5sum "$PKG_SOURCE.tmp" | awk ' { print $1 } '`
+		if [ "$MD5SUM" = "$PKG_MD5" ]
 		then
-			PKG_INFO=`echo $PKG_INFO | awk ' { gsub("%", "'$P'"); print $0 } '`
-			(cd $BASEDIR/work/pkg; mv "$PKG_FILENAME" "$PKG_INFO")
+			mv "$PKG_SOURCE.tmp" "$PKG_SOURCE"
+		else
+			rm -f ".$PKG_FILENAME"
 		fi
 	fi
-}
-
-pkg_source ()
-{
-	if [ -d "$PKG_GIT" ]
-	then
-		PKG_SOURCE="git"
-		return
-	fi
-	for EXT in tar.gz tgz tar.bz2 tar.xz
-	do
-		if [ -f "$1.$EXT" ]
-		then
-			PKG_SOURCE="$1.$EXT"
-			return
-		fi
-	done
-	PKG_SOURCE=""
 }
 
 pkg_download ()
@@ -138,13 +111,25 @@ pkg_download ()
 	P=$PKG
 	if [ ! -r "$BASEDIR/upstream/packages" ]
 	then
+		if [ -z "$PKG_FILENAME" ]
+		then
+			echo "$0: $PKG PKG_FILENAME missing"
+			exit 1
+		fi
+		PKG_SOURCE="$BASEDIR/work/pkg/$PKG_FILENAME"
 		return
 	fi
 	_pkg_info
 	if [ -z "$PKG_FILENAME" ]
 	then
 		PKG_FILENAME=`basename "$PKG_URL"`
+		if [ -z "$PKG_FILENAME" ]
+		then
+			echo "$0: $PKG PKG_URL invalid: $PKG_URL"
+			exit 1
+		fi
 	fi
+	PKG_SOURCE="$BASEDIR/work/pkg/$PKG_FILENAME"
 	if [ -z "$PKG" ]
 	then
 		echo "$0: PKG not defined"
@@ -152,11 +137,7 @@ pkg_download ()
 	fi
 	exec 9<"$BASEDIR/upstream/packages"
 	flock -x 9
-	pkg_source "$BASEDIR/work/pkg/$P"
-	if [ -z "$PKG_SOURCE" ]
-	then
-		_pkg_fetch $P
-	elif [ "$PKG_SOURCE" = "git" ]
+	if [ "$PKG_TYPE" = "git" ]
 	then
 		PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
 		PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
@@ -166,45 +147,37 @@ pkg_download ()
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
 			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
 		fi
+	elif [ ! -r "$PKG_SOURCE" ]
+	then
+		_pkg_fetch $P
+		if [ ! -r "$PKG_SOURCE" ]
+		then
+			echo "$0: $PKG package missing: $PKG_SOURCE"
+			exit 1
+		fi
 	fi
 	exec 9<&-
-	pkg_source "$BASEDIR/work/pkg/$P"
-	if [ -z "$PKG_SOURCE" ]
-	then
-		echo "$0: package missing: $P"
-		exit 1
-	fi
 }
 
 _pkg_unpack ()
 {
-	pkg_source "$BASEDIR/work/pkg/$P"
-	if [ -z "$PKG_SOURCE" ]
-	then
-		echo "$0: package missing: $P"
-		exit 1
-	elif [ "$PKG_SOURCE" = "git" ]
+	if [ "$PKG_TYPE" = "git" ]
 	then
 		true
-	elif (echo $PKG_SOURCE | grep -q '\.tar.gz$')
+	elif (echo "$PKG_FILENAME" | grep -q '\.tar.gz$')
 	then
 		UNPACK="gunzip -c"
-	elif (echo $PKG_SOURCE | grep -q '\.tgz$')
+	elif (echo "$PKG_FILENAME" | grep -q '\.tgz$')
 	then
 		UNPACK="gunzip -c"
-	elif (echo $PKG_SOURCE | grep -q '\.tar.bz2$')
+	elif (echo "$PKG_FILENAME" | grep -q '\.tar.bz2$')
 	then
 		UNPACK="bunzip2 -c"
-	elif (echo $PKG_SOURCE | grep -q '\.tar.xz$')
+	elif (echo "$PKG_FILENAME" | grep -q '\.tar.xz$')
 	then
 		UNPACK="unxz -c"
 	else
-		echo "$0: unknown package format: $PKG_SOURCE"
-		exit 1
-	fi
-	if [ "$PKG_SOURCE" != "git" -a ! -r "$PKG_SOURCE" ]
-	then
-		echo "$0: cannot read package: $PKG_SOURCE"
+		echo "$0: unknown package format: $PKG_FILENAME"
 		exit 1
 	fi
 	if [ $P = $PKG ]
@@ -221,7 +194,7 @@ _pkg_unpack ()
 		mkdir -p "$PKG_UNPACK"
 	fi
 	cd "$PKG_UNPACK"
-	if [ "$PKG_SOURCE" = "git" ]
+	if [ "$PKG_TYPE" = "git" ]
 	then
 		if ! ((cd "$PKG_GIT"; git archive --format=tar --prefix=./ \
 		      "$PKG_VERSION") | tar xf -)
@@ -432,6 +405,7 @@ set -e
 
 PKG_NAME=$PKG_NAME
 PKG_VERSION=$PKG_VERSION
+PKG_FILENAME=$PKG_FILENAME
 PKG_BUILD_NAME=$PKG_BUILD_NAME
 
 . ./setup
