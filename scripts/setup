@@ -52,6 +52,12 @@ _pkg_info ()
 	PKG_URL=`echo $PKG_DATA | awk ' { print $2 } '`
 	PKG_TYPE=`echo $PKG_DATA | awk ' { print $3 } '`
 	PKG_HASH=`echo $PKG_DATA | awk ' { print $4 } '`
+	if [ "$PKG_TYPE" = "git" ]
+	then
+		PKG_SHA1="$PKG_HASH"
+	else
+		PKG_MD5="$PKG_HASH"
+	fi
 	PKG_INFO=`echo $PKG_DATA | awk ' { print $5 } '`
 	if ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
 	then
@@ -72,7 +78,7 @@ _pkg_info ()
 
 _pkg_git_verify ()
 {
-	if ! git diff --quiet "$PKG_HASH..$PKG_VERSION"
+	if ! git diff --quiet "$PKG_SHA1..$PKG_VERSION"
 	then
 		echo "$0: $PKG_VERSION missing/corrupted in $PKG_GIT"
 		return 1
@@ -95,7 +101,7 @@ _pkg_fetch ()
 			curl -L -k -o ".$PKG_LOCAL_NAME" "$PKG_URL"
 		 	MD5SUM=`md5sum "$BASEDIR/work/pkg/.$PKG_LOCAL_NAME" | \
 				awk ' { print $1 } '`
-			if [ "$MD5SUM" = "$PKG_HASH" ]
+			if [ "$MD5SUM" = "$PKG_MD5" ]
 			then
 				mv ".$PKG_LOCAL_NAME" "$PKG_LOCAL_NAME"
 			else
