@@ -438,8 +438,7 @@ then
 	test -e "$BOARD_SETUP" && . "$BOARD_SETUP"
 fi
 
-PKG_NAME_FIXED=$(echo "$PKG_NAME"|sed 's/[_.]$/-/')
-PKG_NAME_FIXED=$(echo "$PKG_NAME_FIXED"|sed 's/[^-]$/&-/')
+PKG_NAME_FIXED=$(echo "$PKG_NAME" | sed 's/[_.]$/-/;s/[^-]$/&-/')
 
 PKG_SOURCES=$(echo "$PKG_NAME_FIXED" | sed 's/-$//;s/-/_/g')_sources
 PKG_SOURCES=$(printenv $PKG_SOURCES || true)
