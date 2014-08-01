@@ -426,9 +426,16 @@ pkg_native_post ()
 
 INITRAMFS_COMPRESS=lzma
 
-if [ -r $BASEDIR/config/setup ]
+. "$BASEDIR/config/$HW_ARCH/setup"
+
+if [ -n "$HW_BOARD" ]
 then
-	. $BASEDIR/config/setup
+	IMAGE_KERNEL="$HW_BOARD-`basename "$LINUX_BINARY"`"
+	UIMAGE_KERNEL="$HW_BOARD-uimage-kernel"
+	IMAGE_INITRAMFS="$HW_BOARD-initramfs"
+	UIMAGE_INITRAMFS="$HW_BOARD-uimage-initramfs"
+	BOARD_SETUP="$BASEDIR/config/$HW_ARCH/$HW_BOARD/setup"
+	test -e "$BOARD_SETUP" && . "$BOARD_SETUP"
 fi
 
 PKG_NAME_FIXED=$(echo "$PKG_NAME"|sed 's/[_.]$/-/')
@@ -470,6 +477,7 @@ export LIB_NAME
 export MAKEFLAGS
 export LINUX_BINARY
 export WEAK_DEPS
+export TOOL_TRIPLET
 
 . ../scripts/setup.local
 
