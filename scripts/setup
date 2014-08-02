@@ -12,7 +12,7 @@ set -e
 export SHELL=/bin/sh
 export LC_ALL=C
 
-test -r "$HOME/.hammerconfig" && . "$HOME/.hammerconfig"
+test -e "$HOME/.hammerconfig" && . "$HOME/.hammerconfig"
 
 BASEDIR=`cd $(dirname $0)/.. && pwd`
 export BUILD_BASE="$BASEDIR/work/$HW_ARCH"
@@ -109,7 +109,7 @@ _pkg_fetch ()
 pkg_download ()
 {
 	P=$PKG
-	if [ ! -r "$BASEDIR/upstream/packages" ]
+	if [ ! -e "$BASEDIR/upstream/packages" ]
 	then
 		if [ -z "$PKG_FILENAME" ]
 		then
@@ -149,10 +149,10 @@ pkg_download ()
 			(cd "$PKG_GIT"; git fetch "$PKG_URL";
 			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
 		fi
-	elif [ ! -r "$PKG_SOURCE" ]
+	elif [ ! -e "$PKG_SOURCE" ]
 	then
 		_pkg_fetch $P
-		if [ ! -r "$PKG_SOURCE" ]
+		if [ ! -e "$PKG_SOURCE" ]
 		then
 			echo "$0: $PKG package missing: $PKG_SOURCE"
 			exit 1
