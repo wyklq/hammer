@@ -58,7 +58,6 @@ _pkg_info ()
 	else
 		PKG_MD5="$PKG_HASH"
 	fi
-	PKG_INFO=`echo $PKG_DATA | awk ' { print $5 } '`
 	if ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
 	then
 		if [ "$PKG_TYPE" = "git" ]
