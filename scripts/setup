@@ -42,8 +42,8 @@ pkg_patch ()
 
 _pkg_info ()
 {
-	PKG_DATA=`cat $BASEDIR/upstream/packages | \
-			awk ' { if ($1 == "'$P'") { print $0; exit } } '`
+	PKG_DATA=`awk ' { if ($1 == "'$P'") { print $0; exit } } ' \
+		  "$BASEDIR/upstream/packages"`
 	if [ -z "$PKG_DATA" ]
 	then
 		echo "$0: upstream location of package $P missing"
