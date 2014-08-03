@@ -19,8 +19,7 @@ export BUILD_BASE="$BASEDIR/work/$HW_ARCH"
 
 pkg_patch ()
 {
-	PATCH_DIR="$BASEDIR/upstream/$PKG_NAME"
-	PATCH_DIR=`echo $PATCH_DIR | sed 's/-$//'`
+	PATCH_DIR=`echo "$BASEDIR/upstream/$PKG_NAME" | sed 's/-$//'`
 	if [ ! -d "$PATCH_DIR" ]
 	then
 		return
@@ -136,8 +135,7 @@ pkg_download ()
 	fi
 	exec 9<"$BASEDIR/upstream/packages"
 	flock -x 9
-	PKG_GIT="$BASEDIR/work/git/${PKG_NAME}"
-	PKG_GIT=`echo "$PKG_GIT" | sed 's/-$//'`
+	PKG_GIT=`echo "$BASEDIR/work/git/$PKG_NAME" | sed 's/-$//'`
 	if [ "$PKG_TYPE" = "git" ]
 	then
 		if [ ! -d "$PKG_GIT" ]
