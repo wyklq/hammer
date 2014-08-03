@@ -244,6 +244,7 @@ pkg_unpack_flat ()
 _pkg_unpack_shared ()
 {
 	PKG_FLAT="--strip-components=1"
+	PKG_SHARED="$BASEDIR/work/shared/$PKG"
 	if [ -z "$PKG" ]
 	then
 		echo "$0: PKG not defined"
@@ -255,13 +256,11 @@ _pkg_unpack_shared ()
 	fi
 	pkg_download
 	mkdir -p "$BASEDIR/work/shared"
-	COUNTER="$BASEDIR/work/shared/.$PKG.count"
-	touch "$COUNTER"
-	touch "$COUNTER.lock"
-	exec 9<"$COUNTER.lock"
+	LOCK="$BASEDIR/work/shared/.$PKG.lock"
+	touch "$LOCK"
+	exec 9<"$LOCK"
 	flock -x 9
-	COUNT=`cat "$COUNTER"`
-	if [ -n "$COUNT" ] && [ "$COUNT" -gt 0 ]
+	if [ -e "$PKG_SHARED" ]
 	then
 		exec 9<&-
 		test -d $PKG_DIR-build && rm -rf $PKG_DIR-build
@@ -277,9 +276,9 @@ _pkg_unpack_shared ()
 		cd "$PKG_DIR-build"
 		return
 	fi
-	PKG_UNPACK="$PKG_SHARED"
+	PKG_UNPACK="$BASEDIR/work/shared/.$PKG"
 	_pkg_unpack
-	echo 1 > "$COUNTER"
+	mv "$PKG_UNPACK" "$PKG_SHARED"
 	exec 9<&-
 }
 
@@ -455,7 +454,6 @@ then
 	fi
 	PKG=$PKG_NAME$PKG_VERSION
 	PKG_DIR="$BUILD_BASE$PKG_DIR_ADD/$PKG_BUILD_NAME$PKG_VERSION"
-	PKG_SHARED="$BASEDIR/work/shared/$PKG"
 	PKG_STAGING="$BUILD_BASE/$BUILD_SUBSYSTEM/build/${PKG_BUILD_NAME}pkg"
 fi
 
