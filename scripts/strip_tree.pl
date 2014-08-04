@@ -33,7 +33,7 @@ sub strip_tree {
 	my $f = $File::Find::name;
 	return if /\.([aho]|exec|img|image|ko|mod|module)$/;
 	$f =~ s/^.\///;
-	next if $f =~ /^usr\/lib\/debug\//;
+	next if $f =~ /^usr\/(lib\/debug|share)\//;
 	my $target_debug = "$debug_dir/$f.debug";
 	next if -e $target_debug;
 	return unless -f $_ && not -l $_;
