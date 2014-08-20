@@ -44,21 +44,24 @@ pkg_patch ()
 
 _pkg_info ()
 {
-	PKG_DATA=`awk ' { if ($1 == "'$P'") { print $0; exit } } ' \
-		  "$BASEDIR/upstream/packages"`
-	if [ -z "$PKG_DATA" ]
+	if [ -z "$PKG_URL" ]
 	then
-		echo "$0: upstream location of package $P missing"
-		exit 1
-	fi
-	PKG_URL=`echo $PKG_DATA | awk ' { print $2 } '`
-	PKG_TYPE=`echo $PKG_DATA | awk ' { print $3 } '`
-	PKG_HASH=`echo $PKG_DATA | awk ' { print $4 } '`
-	if [ "$PKG_TYPE" = "git" ]
-	then
-		PKG_SHA1="$PKG_HASH"
-	else
-		PKG_MD5="$PKG_HASH"
+		PKG_DATA=`awk ' { if ($1 == "'$P'") { print $0; exit } } ' \
+			  "$BASEDIR/upstream/packages"`
+		if [ -z "$PKG_DATA" ]
+		then
+			echo "$0: upstream location of package $P missing"
+			exit 1
+		fi
+		PKG_URL=`echo $PKG_DATA | awk ' { print $2 } '`
+		PKG_TYPE=`echo $PKG_DATA | awk ' { print $3 } '`
+		PKG_HASH=`echo $PKG_DATA | awk ' { print $4 } '`
+		if [ "$PKG_TYPE" = "git" ]
+		then
+			PKG_SHA1="$PKG_HASH"
+		else
+			PKG_MD5="$PKG_HASH"
+		fi
 	fi
 	if [ -z "$PKG_URL" ]
 	then
