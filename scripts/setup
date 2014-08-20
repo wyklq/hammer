@@ -94,8 +94,7 @@ _pkg_fetch ()
 	then
 		git clone --bare "$PKG_URL" "$PKG_GIT" || rm -rf "$PKG_GIT"
 		_pkg_git_verify || rm -rf "$PKG_GIT"
-	elif [ "$PKG_TYPE" = "www" ]
-	then
+	else
 		curl -L -k -o "$PKG_SOURCE.tmp" "$PKG_URL"
 		MD5SUM=`md5sum "$PKG_SOURCE.tmp" | awk ' { print $1 } '`
 		if [ "$MD5SUM" = "$PKG_MD5" ]
