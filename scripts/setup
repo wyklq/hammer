@@ -60,7 +60,11 @@ _pkg_info ()
 	else
 		PKG_MD5="$PKG_HASH"
 	fi
-	if ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
+	if [ -z "$PKG_URL" ]
+	then
+		echo "PKG_URL for package $P is not defined."
+		exit 1
+	elif ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
 	then
 		if [ "$PKG_TYPE" = "git" ]
 		then
