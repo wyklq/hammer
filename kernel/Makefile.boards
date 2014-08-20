@@ -8,11 +8,17 @@
 
 boards = $(shell ../scripts/list-boards.sh $(HW_ARCH))
 build_boards = $(patsubst %,board-%,$(boards))
+list_boards = $(patsubst %, list-%, $(boards))
 dl_boards = $(patsubst %, dl-%, $(boards))
 
 all: $(build_boards)
 
+list: $(list_boards)
+
 download: $(dl_boards)
+
+$(list_boards): list-%:
+	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$* list
 
 $(build_boards): board-%:
 	@$(MAKE) HW_ARCH=$(HW_ARCH) HW_BOARD=$* depend

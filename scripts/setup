@@ -6,7 +6,10 @@
 # Licensed under the GNU General Public License version 2 (GPLv2).
 #
 
-set -x
+if [ "$1" != "list" ]
+then
+	set -x
+fi
 set -e
 
 export SHELL=/bin/sh
@@ -480,6 +483,19 @@ then
 	if [ "$PKG_VERSION" != "NONE" ]
 	then
 		pkg_download
+	fi
+	exit 0
+elif [ "$1" = "list" ]
+then
+	if [ "$PKG_VERSION" != "NONE" ]
+	then
+		P=$PKG
+		_pkg_info
+		if [ -n "$PKG_TYPE" ]
+		then
+			PKG_TYPE=" $PKG_TYPE"
+		fi
+		echo "$2 $PKG $PKG_URL $PKG_HASH$PKG_TYPE"
 	fi
 	exit 0
 fi

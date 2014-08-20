@@ -12,6 +12,7 @@ cross_archs = $(patsubst %,cross-%,$(archs))
 initramfs_archs = $(patsubst %,initramfs-%,$(archs))
 _rootfs_archs = $(shell scripts/list-archs.sh -r)
 rootfs_archs = $(patsubst %,rootfs-%,$(_rootfs_archs))
+list_archs = $(patsubst %, list-%, $(archs))
 dl_archs = $(patsubst %, dl-%, $(archs))
 
 MAKEFLAGS += --no-print-directory
@@ -20,6 +21,7 @@ all: help
 
 help:
 	@echo "Makefile targets:"
+	@echo "   list       ... List all source packages"
 	@echo "   download   ... Download all source packages"
 	@echo "   boards     ... Build all boards"
 	@echo "   toolchain  ... Build all cross-compilation toolchains"
@@ -32,6 +34,12 @@ $(dl_archs): dl-%:
 	@$(MAKE) -C initramfs HW_ARCH=$* download
 	@$(MAKE) -C rootfs HW_ARCH=$* download
 	@$(MAKE) -C kernel -f Makefile.boards HW_ARCH=$* download
+
+$(list_archs): list-%:
+	@$(MAKE) -C toolchain HW_ARCH=$* list
+	@$(MAKE) -C initramfs HW_ARCH=$* list
+	@$(MAKE) -C rootfs HW_ARCH=$* list
+	@$(MAKE) -C kernel -f Makefile.boards HW_ARCH=$* list
 
 $(board_archs): board-%:
 	@$(MAKE) -C kernel -f Makefile.boards HW_ARCH=$*
@@ -82,6 +90,12 @@ _download: $(dl_archs)
 download::
 	@$(MAKE) -C utils download
 	@$(MAKE) _download
+
+_list: $(list_archs)
+
+list::
+	@$(MAKE) -C utils list
+	@$(MAKE) _list
 
 clean_shared:
 	@(test -d work || mkdir work)
