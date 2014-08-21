@@ -392,11 +392,6 @@ pkg_cleanup ()
 	return 0
 }
 
-pkg_cleanup_shared ()
-{
-	pkg_cleanup
-}
-
 pkg_native_pre ()
 {
 	PKG_SCRIPT="$PKG_STAGING/$BUILD_NATIVE/native/build-$PKG_BUILD_NAME.sh"
