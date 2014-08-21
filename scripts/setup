@@ -425,6 +425,12 @@ pkg_native_post ()
 	chmod 755 "$PKG_SCRIPT"
 	mkdir -p "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
 	install -p -m 644 "$PKG_SOURCE" "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
+	PATCH_DIR=`echo "$BASEDIR/upstream/$PKG_NAME" | sed 's/-$//'`
+	if [ -d "$PATCH_DIR" ]
+	then
+		mkdir "$PKG_STAGING/$BUILD_NATIVE/upstream"
+		cp -pr "$PATCH_DIR" "$PKG_STAGING/$BUILD_NATIVE/upstream"
+	fi
 	pkg_install "$BUILD_ROOTFS"
 	pkg_cleanup
 }
