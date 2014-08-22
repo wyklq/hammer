@@ -506,6 +506,12 @@ then
 	then
 		P=$PKG
 		_pkg_info
+		if [ "$PKG_TYPE" = "git" ]
+		then
+			PKG_HASH="$PKG_SHA1"
+		else
+			PKG_HASH="$PKG_MD5"
+		fi
 		echo "$2 $PKG $PKG_URL $PKG_HASH $PKG_TYPE $PKG_DATE"
 	fi
 	exit 0
