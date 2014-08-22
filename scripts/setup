@@ -82,6 +82,10 @@ _pkg_info ()
 		fi
 		PKG_URL="$URL_BASE$PKG_URL"
 	fi
+	if [ -z "$PKG_TYPE" ]
+	then
+		PKG_TYPE="tarball"
+	fi
 }
 
 _pkg_git_verify ()
@@ -498,11 +502,7 @@ then
 	then
 		P=$PKG
 		_pkg_info
-		if [ -n "$PKG_TYPE" ]
-		then
-			PKG_TYPE=" $PKG_TYPE"
-		fi
-		echo "$2 $PKG $PKG_URL $PKG_HASH$PKG_TYPE"
+		echo "$2 $PKG $PKG_URL $PKG_HASH $PKG_TYPE"
 	fi
 	exit 0
 fi
