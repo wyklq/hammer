@@ -86,6 +86,10 @@ _pkg_info ()
 	then
 		PKG_TYPE="tarball"
 	fi
+	if [ -z "$PKG_DATE" ]
+	then
+		PKG_DATE=1970-01-01
+	fi
 }
 
 _pkg_git_verify ()
@@ -502,7 +506,7 @@ then
 	then
 		P=$PKG
 		_pkg_info
-		echo "$2 $PKG $PKG_URL $PKG_HASH $PKG_TYPE"
+		echo "$2 $PKG $PKG_URL $PKG_HASH $PKG_TYPE $PKG_DATE"
 	fi
 	exit 0
 fi
