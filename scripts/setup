@@ -18,7 +18,7 @@ export LC_ALL=C
 test -e "$HOME/.hammerconfig" && . "$HOME/.hammerconfig"
 
 BASEDIR=`cd $(dirname $0)/.. && pwd`
-export BUILD_BASE="$BASEDIR/work/$HW_ARCH"
+BUILD_BASE="$BASEDIR/work/$HW_ARCH"
 
 pkg_patch ()
 {
@@ -470,7 +470,7 @@ then
 	PKG_STAGING="$BUILD_BASE/$BUILD_SUBSYSTEM/build/${PKG_BUILD_NAME}pkg"
 fi
 
-export BUILD_TOOLCHAIN="$BUILD_BASE/toolchain"
+BUILD_TOOLCHAIN="$BUILD_BASE/toolchain"
 BUILD_UTILS=$BASEDIR/work/host/utils
 export PATH="$BUILD_TOOLCHAIN/bin:$BUILD_UTILS/bin:$PATH"
 
@@ -481,9 +481,7 @@ LIB_NAME=${LIB_NAME:-lib}
 
 export LIB_NAME
 export MAKEFLAGS
-export LINUX_BINARY
 export WEAK_DEPS
-export TOOL_TRIPLET
 
 . ../scripts/setup.local
 
