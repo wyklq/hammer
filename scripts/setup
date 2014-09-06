@@ -393,10 +393,7 @@ pkg_cleanup ()
 	else
 		rm -rf "$PKG_DIR"
 	fi
-	if [ -n "$PKG_STAGING" -a -d "$PKG_STAGING" ]
-	then
-		rm -rf "$PKG_STAGING"
-	fi
+	test -d "$PKG_STAGING" && rm -rf "$PKG_STAGING"
 	return 0
 }
 
