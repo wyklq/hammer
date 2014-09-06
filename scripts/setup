@@ -177,25 +177,6 @@ pkg_download ()
 
 _pkg_unpack ()
 {
-	if [ "$PKG_TYPE" = "git" ]
-	then
-		true
-	elif (echo "$PKG_FILENAME" | grep -q '\.tar.gz$')
-	then
-		UNPACK="gunzip -c"
-	elif (echo "$PKG_FILENAME" | grep -q '\.tgz$')
-	then
-		UNPACK="gunzip -c"
-	elif (echo "$PKG_FILENAME" | grep -q '\.tar.bz2$')
-	then
-		UNPACK="bunzip2 -c"
-	elif (echo "$PKG_FILENAME" | grep -q '\.tar.xz$')
-	then
-		UNPACK="unxz -c"
-	else
-		echo "$0: unknown package format: $PKG_FILENAME"
-		exit 1
-	fi
 	if [ $P = $PKG ]
 	then
 		test -d "$PKG_UNPACK" && rm -rf "$PKG_UNPACK"
@@ -218,7 +199,7 @@ _pkg_unpack ()
 			echo "$0: could not export $PKG_VERSION from $PKG_GIT"
 			exit 1
 		fi
-	elif ! ($UNPACK $PKG_SOURCE | tar xf - $PKG_FLAT)
+	elif ! tar xaf "$PKG_SOURCE" $PKG_FLAT
 	then
 		echo "$0: could not unpack $PKG_SOURCE"
 		exit 1
