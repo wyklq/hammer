@@ -438,8 +438,6 @@ pkg_native_post ()
 	pkg_cleanup
 }
 
-INITRAMFS_COMPRESS=lzma
-
 . "$BASEDIR/config/$HW_ARCH/setup"
 
 if [ -n "$HW_BOARD" ]

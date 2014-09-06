@@ -1,2 +1,3 @@
+INITRAMFS_COMPRESS=lzma
 PKG_DIR_ADD="/kernel-$HW_BOARD"
 . ../scripts/setup
