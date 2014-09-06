@@ -487,26 +487,6 @@ export TOOL_TRIPLET
 
 . ../scripts/setup.local
 
-if [ "$1" = "download" ]
-then
-	if [ "$PKG_VERSION" != "NONE" ]
-	then
-		pkg_download
-	fi
-	exit 0
-elif [ "$1" = "list" ]
-then
-	if [ "$PKG_VERSION" != "NONE" ]
-	then
-		P=$PKG
-		_pkg_info
-		if [ "$PKG_TYPE" = "git" ]
-		then
-			PKG_HASH="$PKG_SHA1"
-		else
-			PKG_HASH="$PKG_MD5"
-		fi
-		echo "$2 $PKG $PKG_URL $PKG_HASH $PKG_TYPE $PKG_DATE"
-	fi
-	exit 0
-fi
+test -n "$1" && . "../scripts/setup.$1"
+
+return 0

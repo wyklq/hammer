@@ -1,0 +1,21 @@
+#
+# This file is part of the HAMMER build system.
+#
+# Copyright (C) 2012-2014 Aaro Koskinen <aaro.koskinen@iki.fi>
+#
+# Licensed under the GNU General Public License version 2 (GPLv2).
+#
+
+if [ "$PKG_VERSION" != "NONE" ]
+then
+	P=$PKG
+	_pkg_info
+	if [ "$PKG_TYPE" = "git" ]
+	then
+		PKG_HASH="$PKG_SHA1"
+	else
+		PKG_HASH="$PKG_MD5"
+	fi
+	echo "$2 $PKG $PKG_URL $PKG_HASH $PKG_TYPE $PKG_DATE"
+fi
+exit 0
