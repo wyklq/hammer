@@ -121,6 +121,17 @@ _pkg_fetch ()
 	fi
 }
 
+_pkg_copy ()
+{
+	if [ "$PKG_TYPE" = "git" ]
+	then
+		(cd "$PKG_GIT"; git archive --format=tar.gz --prefix=./
+			--output "$1/$PKG.tar.gz" "$PKG_VERSION")
+	else
+		install -p -m 644 "$PKG_SOURCE" "$1"
+	fi
+}
+
 pkg_download ()
 {
 	P=$PKG
@@ -405,7 +416,7 @@ pkg_native_post ()
 {
 	chmod 755 "$PKG_SCRIPT"
 	mkdir -p "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
-	install -p -m 644 "$PKG_SOURCE" "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
+	_pkg_copy "$PKG_STAGING/$BUILD_NATIVE/work/pkg"
 	PATCH_DIR=`echo "$BASEDIR/upstream/$PKG_NAME" | sed 's/-$//'`
 	if [ -d "$PATCH_DIR" ]
 	then
