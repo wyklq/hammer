@@ -9,7 +9,7 @@
 
 LOG_FILE="$FAKE_TARGET".log
 LOG_DIR=`dirname $LOG_FILE`
-PRINT=`echo "$FAKE_TARGET" | cut -d/ -f3,4,6 | sed 's/-files$//'`
+PRINT=`echo "$FAKE_TARGET" | cut -d/ -f3,4,6 | sed 's/-build$//'`
 mkdir -p $LOG_DIR
 echo Building $PRINT...
 $1 > $LOG_FILE 2>&1

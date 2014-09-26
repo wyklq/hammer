@@ -368,7 +368,7 @@ pkg_dummy ()
 	fi
 	DIR=`dirname "$PKG_STAGING"`
 	mkdir -p $DIR
-	touch "$DIR/${PKG_BUILD_NAME}files"
+	touch "$DIR/${PKG_BUILD_NAME}build"
 }
 
 pkg_cleanup ()
@@ -379,7 +379,11 @@ pkg_cleanup ()
 	else
 		rm -rf "$PKG_DIR"
 	fi
-	test -d "$PKG_STAGING" && rm -rf "$PKG_STAGING"
+	if [ -d "$PKG_STAGING" ]
+	then
+		touch "$PKG_STAGING/../${PKG_BUILD_NAME}build"
+		rm -rf "$PKG_STAGING"
+	fi
 	return 0
 }
 

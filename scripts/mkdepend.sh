@@ -48,7 +48,7 @@ for SCRIPT in $*
 do
 	PKG_NAME=`cat $SCRIPT | grep -m 1 '^PKG_NAME=' | cut -d= -f 2`
 	PKG=`echo $SCRIPT| sed 's/^build-//;s/\.sh$//'`
-	S="$PKG-files"
+	S="$PKG-build"
 	DEPS=`cat $SCRIPT | grep '^# dependencies: ' | sed 's/.*: //'`
 	if [ "$PREPARE" = "1" -a "$SCRIPT" != "build-prepare.sh" ]
 	then
@@ -78,7 +78,7 @@ do
 		then
 			test ! -h "$D" && DD="$DD $D"
 		else
-			DD="$DD "`echo $D-files | sed "s/^/$TARGET/"`
+			DD="$DD "`echo $D-build | sed "s/^/$TARGET/"`
 		fi
 	done
 	if [ -n "$DD" ]
@@ -95,7 +95,7 @@ done
 
 if [ "$PREPARE" = "1" -a -z "$WEAK_DEPS" ]
 then
-	ls $PDEPS | sed "s/^/${TARGET}prepare-files: /"
+	ls $PDEPS | sed "s/^/${TARGET}prepare-build: /"
 fi
 
 for D in $DUMMY
@@ -105,5 +105,5 @@ done
 
 if [ "$FINALIZE" = "1" ]
 then
-	echo $ALL | sed "s/^/${TARGET}finalize-files: /"
+	echo $ALL | sed "s/^/${TARGET}finalize-build: /"
 fi
