@@ -330,7 +330,8 @@ pkg_install ()
 		find "./$SUBDIR" -type f -o -type l | \
 		sed 's/^\.\/\/*//' | \
 		grep -v '^\.files$' > .files)
-	(cd "$PKG_STAGING"; tar cf - -T .files) | (cd "$TARGET_DIR"; tar xfp -)
+	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
+		(cd "$TARGET_DIR"; tar xfp -)
 	mv "$PKG_STAGING/.files" \
 		"$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
 	touch "$PKG_STAGING/../.modified"
