@@ -307,7 +307,6 @@ pkg_unpack_shared ()
 pkg_install ()
 {
 	TARGET_DIR="$1"
-	shift
 	if [ -z "$TARGET_DIR" ]
 	then
 		echo "$0: target dir not specified"
@@ -317,26 +316,20 @@ pkg_install ()
 		echo "$0: no staging directory specified"
 		exit 1
 	fi
-	SUBTARGET="$1"
-	if [ -n "$SUBTARGET" ]
+	if [ -n "$2" ]
 	then
-		shift
-		SUBTARGET="-$SUBTARGET"
-		DIRS=$*
+		SUBTARGET="-$2"
+		SUBDIR="$3"
 	else
-		DIRS="/"
+		SUBTARGET=""
+		SUBDIR=""
 	fi
 	mkdir -p "$TARGET_DIR"
-	rm -f "$PKG_STAGING/.files"
-	touch "$PKG_STAGING/.files"
-	for D in $DIRS
-	do
-		"$BASEDIR/scripts/strip_tree.pl" "$PKG_STAGING/$D/$STRIP_BASE"
-		(cd "$PKG_STAGING"; \
-			find ./$D -type f -o -type l | \
-			sed 's/^\.\/\/*//' | \
-			grep -v '^\.files$' >> .files)
-	done
+	"$BASEDIR/scripts/strip_tree.pl" "$PKG_STAGING/$SUBDIR/$STRIP_BASE"
+	(cd "$PKG_STAGING"; \
+		find "./$SUBDIR" -type f -o -type l | \
+		sed 's/^\.\/\/*//' | \
+		grep -v '^\.files$' > .files)
 	(cd "$PKG_STAGING"; tar cf - -T .files) | (cd "$TARGET_DIR"; tar xfp -)
 	mv "$PKG_STAGING/.files" \
 		"$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
