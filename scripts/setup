@@ -306,8 +306,8 @@ pkg_unpack_shared ()
 
 pkg_install ()
 {
-	TARGET_DIR="$1"
-	if [ -z "$TARGET_DIR" ]
+	PKG_INSTALL_DIR="$1"
+	if [ -z "$PKG_INSTALL_DIR" ]
 	then
 		echo "$0: target dir not specified"
 		exit 1
@@ -324,16 +324,16 @@ pkg_install ()
 		SUBTARGET=""
 		SUBDIR=""
 	fi
-	mkdir -p "$TARGET_DIR"
+	PKG_INSTALL_FILES="$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
+	mkdir -p "$PKG_INSTALL_DIR"
 	"$BASEDIR/scripts/strip_tree.pl" "$PKG_STAGING/$SUBDIR/$STRIP_BASE"
 	(cd "$PKG_STAGING"; \
 		find "./$SUBDIR" -type f -o -type l | \
 		sed 's/^\.\/\/*//' | \
 		grep -v '^\.files$' > .files)
 	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
-		(cd "$TARGET_DIR"; tar xfp -)
-	mv "$PKG_STAGING/.files" \
-		"$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
+		(cd "$PKG_INSTALL_DIR"; tar xfp -)
+	mv "$PKG_STAGING/.files" "$PKG_INSTALL_FILES"
 	touch "$PKG_STAGING/../.modified"
 }
 
