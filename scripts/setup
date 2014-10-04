@@ -305,9 +305,8 @@ pkg_unpack_shared ()
 	cd "$PKG_DIR-build"
 }
 
-pkg_install ()
+_pkg_install ()
 {
-	PKG_INSTALL_DIR="$1"
 	if [ -z "$PKG_INSTALL_DIR" ]
 	then
 		echo "$0: target dir not specified"
@@ -321,9 +320,12 @@ pkg_install ()
 	then
 		SUBTARGET="-$2"
 		SUBDIR="$3"
+		shift 3
+		FILES="$*"
 	else
 		SUBTARGET=""
 		SUBDIR=""
+		FILES=""
 	fi
 	mkdir -p "$PKG_INSTALL_DIR"
 	STRIP_DIR="$PKG_STAGING/$SUBDIR/$STRIP_BASE"
@@ -332,8 +334,18 @@ pkg_install ()
 		"$BASEDIR/scripts/strip_tree.pl" "$STRIP_DIR"
 		PKG_STRIPPED="$STRIP_DIR"
 	fi
+	SUBDIR="./$SUBDIR"
+	if [ -n "$FILES" ]
+	then
+		FF=""
+		for F in $FILES
+		do
+			FF="$FF $SUBDIR$F"
+		done
+		SUBDIR="$FF"
+	fi
 	(cd "$PKG_STAGING"; \
-		find "./$SUBDIR" -type f -o -type l | \
+		find $SUBDIR -type f -o -type l | sort | uniq | \
 		sed 's/^\.\/\/*//' | \
 		grep -v '^\.files$' > .files)
 	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
@@ -347,6 +359,21 @@ pkg_install ()
 		cat "$PKG_STAGING/.files" >> "$PKG_INSTALL_FILES"
 	fi
 	touch "$PKG_STAGING/../.modified"
+}
+
+pkg_install ()
+{
+	PKG_INSTALL_DIR="$1"
+	PKG_INSTALL_PART=""
+	_pkg_install $*
+}
+
+pkg_install_part ()
+{
+	PKG_INSTALL_DIR="$1"
+	PKG_INSTALL_PART="$2"
+	shift 2
+	_pkg_install "$PKG_INSTALL_DIR" "$PKG_INSTALL_PART" "" $*
 }
 
 pkg_install_script ()
