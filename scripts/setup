@@ -307,7 +307,7 @@ pkg_unpack_shared ()
 
 _pkg_install_files ()
 {
-	(cd "$PKG_STAGING"; find $* -type f -o -type l | \
+	(cd "$PKG_STAGING"; find $(echo $1) -type f -o -type l | \
 		sed 's/^\.\/\/*//;s/\/\/*/\//g' | sort | uniq | \
 		grep -v '^\.files$' > .files)
 	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
@@ -325,12 +325,11 @@ _pkg_install ()
 		echo "$0: no staging directory specified"
 		exit 1
 	fi
-	if [ -n "$2" ]
+	if [ -n "$1" ]
 	then
-		SUBTARGET="-$2"
-		SUBDIR="$3"
-		shift 3
-		FILES="$*"
+		SUBTARGET="-$1"
+		SUBDIR="$2"
+		FILES="$3"
 	else
 		SUBTARGET=""
 		SUBDIR=""
@@ -344,7 +343,7 @@ _pkg_install ()
 		PKG_STRIPPED="$STRIP_DIR"
 		if [ -d "$PKG_STAGING/$STRIP_DIR/usr/lib/debug" ]
 		then
-			_pkg_install_files ./$STRIP_DIR/usr/lib/debug
+			_pkg_install_files "./$STRIP_DIR/usr/lib/debug"
 			if [ -n "$PKG_INSTALL_PART" ]
 			then
 				INSTALL_FILES="${PKG_BUILD_NAME}files"
@@ -355,17 +354,8 @@ _pkg_install ()
 			mv "$PKG_STAGING/.files" "$INSTALL_FILES"
 		fi
 	fi
-	SUBDIR="./$SUBDIR"
-	if [ -n "$FILES" ]
-	then
-		FF=""
-		for F in $FILES
-		do
-			FF="$FF $SUBDIR$F"
-		done
-		SUBDIR="$FF"
-	fi
-	_pkg_install_files $SUBDIR
+	FILES=$(echo "$FILES" | sed "s#^#./$SUBDIR#;s#\s\(\S\)# ./$SUBDIR\1#")
+	_pkg_install_files "$FILES"
 	INSTALL_FILES="$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
 	if [ "$PKG_INSTALL_FILES" != "$INSTALL_FILES" ]
 	then
@@ -381,15 +371,14 @@ pkg_install ()
 {
 	PKG_INSTALL_DIR="$1"
 	PKG_INSTALL_PART=""
-	_pkg_install $*
+	_pkg_install "$2" "$3" "$4"
 }
 
 pkg_install_part ()
 {
 	PKG_INSTALL_DIR="$1"
 	PKG_INSTALL_PART="$2"
-	shift 2
-	_pkg_install "$PKG_INSTALL_DIR" "$PKG_INSTALL_PART" "" $*
+	_pkg_install "$2" "" "$3"
 }
 
 pkg_install_script ()
