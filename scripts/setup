@@ -305,6 +305,15 @@ pkg_unpack_shared ()
 	cd "$PKG_DIR-build"
 }
 
+_pkg_install_files ()
+{
+	(cd "$PKG_STAGING"; find $* -type f -o -type l | \
+		sed 's/^\.\/\/*//;s/\/\/*/\//g' | sort | uniq | \
+		grep -v '^\.files$' > .files)
+	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
+		(cd "$PKG_INSTALL_DIR"; tar xfp -)
+}
+
 _pkg_install ()
 {
 	if [ -z "$PKG_INSTALL_DIR" ]
@@ -328,11 +337,23 @@ _pkg_install ()
 		FILES=""
 	fi
 	mkdir -p "$PKG_INSTALL_DIR"
-	STRIP_DIR="$PKG_STAGING/$SUBDIR/$STRIP_BASE"
+	STRIP_DIR="$SUBDIR/$STRIP_BASE"
 	if [ "$PKG_STRIPPED" != "$STRIP_DIR" ]
 	then
-		"$BASEDIR/scripts/strip_tree.pl" "$STRIP_DIR"
+		"$BASEDIR/scripts/strip_tree.pl" "$PKG_STAGING/$STRIP_DIR"
 		PKG_STRIPPED="$STRIP_DIR"
+		if [ -d "$PKG_STAGING/$STRIP_DIR/usr/lib/debug" ]
+		then
+			_pkg_install_files ./$STRIP_DIR/usr/lib/debug
+			if [ -n "$PKG_INSTALL_PART" ]
+			then
+				INSTALL_FILES="${PKG_BUILD_NAME}files"
+			else
+				INSTALL_FILES="${PKG_BUILD_NAME}files$SUBTARGET"
+			fi
+			INSTALL_FILES="$PKG_STAGING/../$INSTALL_FILES-debuginfo"
+			mv "$PKG_STAGING/.files" "$INSTALL_FILES"
+		fi
 	fi
 	SUBDIR="./$SUBDIR"
 	if [ -n "$FILES" ]
@@ -344,12 +365,7 @@ _pkg_install ()
 		done
 		SUBDIR="$FF"
 	fi
-	(cd "$PKG_STAGING"; \
-		find $SUBDIR -type f -o -type l | sort | uniq | \
-		sed 's/^\.\/\/*//' | \
-		grep -v '^\.files$' > .files)
-	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
-		(cd "$PKG_INSTALL_DIR"; tar xfp -)
+	_pkg_install_files $SUBDIR
 	INSTALL_FILES="$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
 	if [ "$PKG_INSTALL_FILES" != "$INSTALL_FILES" ]
 	then
