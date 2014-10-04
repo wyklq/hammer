@@ -327,7 +327,12 @@ pkg_install ()
 	fi
 	PKG_INSTALL_FILES="$PKG_STAGING/../${PKG_BUILD_NAME}files$SUBTARGET"
 	mkdir -p "$PKG_INSTALL_DIR"
-	"$BASEDIR/scripts/strip_tree.pl" "$PKG_STAGING/$SUBDIR/$STRIP_BASE"
+	STRIP_DIR="$PKG_STAGING/$SUBDIR/$STRIP_BASE"
+	if [ "$PKG_STRIPPED" != "$STRIP_DIR" ]
+	then
+		"$BASEDIR/scripts/strip_tree.pl" "$STRIP_DIR"
+		PKG_STRIPPED="$STRIP_DIR"
+	fi
 	(cd "$PKG_STAGING"; \
 		find "./$SUBDIR" -type f -o -type l | \
 		sed 's/^\.\/\/*//' | \
