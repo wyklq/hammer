@@ -507,14 +507,14 @@ then
 	test -e "$BOARD_SETUP" && . "$BOARD_SETUP"
 fi
 
-PKG_NAME_FIXED=$(echo "$PKG_NAME" | sed 's/[_.]$/-/;s/[^-]$/&-/')
+PKG_NAME=$(echo "$PKG_NAME" | sed 's/[_.]$/-/;s/[^-]$/&-/')
 
-PKG_SOURCES=$(echo "$PKG_NAME_FIXED" | sed 's/-$//;s/-/_/g')_sources
+PKG_SOURCES=$(echo "$PKG_NAME" | sed 's/-$//;s/-/_/g')_sources
 PKG_SOURCES=$(printenv $PKG_SOURCES || true)
 
 if [ -z "$PKG_BUILD_NAME" ]
 then
-	PKG_BUILD_NAME="$PKG_NAME_FIXED"
+	PKG_BUILD_NAME="$PKG_NAME"
 else
 	PKG_BUILD_NAME=$(echo "$PKG_BUILD_NAME" | sed 's/[^-]$/&-/')
 fi
