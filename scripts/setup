@@ -515,6 +515,8 @@ PKG_SOURCES=$(printenv $PKG_SOURCES || true)
 if [ -z "$PKG_BUILD_NAME" ]
 then
 	PKG_BUILD_NAME="$PKG_NAME_FIXED"
+else
+	PKG_BUILD_NAME=$(echo "$PKG_BUILD_NAME" | sed 's/[^-]$/&-/')
 fi
 
 PKG_STAGING=""
