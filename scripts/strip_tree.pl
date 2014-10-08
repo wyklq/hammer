@@ -27,7 +27,6 @@ $debug_dir = "usr/lib/debug";
 $obj_copy  = $ENV{"OBJCOPY"};
 $strip     = $ENV{"STRIP"};
 die("$0: STRIP undefined\n") unless length $strip;
-create_dir($debug_dir) if length $obj_copy;
  
 sub strip_tree {
 	my $f = $File::Find::name;
