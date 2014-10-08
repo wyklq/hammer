@@ -325,7 +325,12 @@ _pkg_install ()
 		echo "$0: no staging directory specified"
 		exit 1
 	fi
-	if [ -n "$1" ]
+	if [ "$1" = "default" ]
+	then
+		SUBTARGET=""
+		SUBDIR="$2"
+		FILES="$3"
+	elif [ -n "$1" ]
 	then
 		SUBTARGET="-$1"
 		SUBDIR="$2"
