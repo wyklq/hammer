@@ -38,7 +38,7 @@ $(fake_targets): ../work/$(HW_ARCH)/$(BUILD_SUBSYSTEM)/build/%-build: build-%.sh
 
 ../work/.dependencies.$(HW_ARCH)-$(BUILD_SUBSYSTEM)::
 	@BUILD_SUBSYSTEM=$(BUILD_SUBSYSTEM) HW_ARCH=$(HW_ARCH) \
-		BUILD_DEPENDS=$(BUILD_DEPENDS) \
+		BUILD_DEPENDS="$(BUILD_DEPENDS)" \
 		../scripts/mkdepend.sh $(build_scripts) > $@
 
 -include ../work/.dependencies.$(HW_ARCH)-$(BUILD_SUBSYSTEM)

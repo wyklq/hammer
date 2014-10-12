@@ -23,12 +23,15 @@ TARGET="..\/work\/$HW_ARCH\/$BUILD_SUBSYSTEM\/build\/"
 SUBSYSDEP=""
 if [ -n "$BUILD_DEPENDS" -a -z "$WEAK_DEPS" ]
 then
-	if [ "$BUILD_DEPENDS" = "utils" ]
-	then
-		SUBSYSDEP="../work/host/utils/build/.modified"
-	else 
-		SUBSYSDEP="../work/$HW_ARCH/$BUILD_DEPENDS/build/.modified"
-	fi
+	for DEP in $BUILD_DEPENDS
+	do
+		if [ "$BUILD_DEPENDS" = "utils" ]
+		then
+			SUBSYSDEP="../work/host/utils/build/.modified"
+		else 
+			SUBSYSDEP="../work/$HW_ARCH/$DEP/build/.modified"
+		fi
+	done
 fi
 
 PREPARE=0
