@@ -438,7 +438,7 @@ pkg_dummy ()
 	fi
 	DIR=`dirname "$PKG_STAGING"`
 	mkdir -p $DIR
-	touch "$DIR/${PKG_BUILD_NAME}build"
+	touch "$DIR/${PKG_BUILD_NAME}build" "$DIR/.modified"
 }
 
 pkg_cleanup ()
