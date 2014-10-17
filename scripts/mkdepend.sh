@@ -64,8 +64,9 @@ do
 	fi
 	if [ -d "../upstream/$PKG" ]
 	then
-		DEPS="../upstream/$PKG/* $DEPS"
-		PDEPS="../upstream/$PKG/* $PDEPS"
+		PATCHES=`find "../upstream/$PKG" -type f`
+		DEPS="$PATCHES $DEPS"
+		PDEPS="$PATCHES $PDEPS"
 	fi
 	PKG_FORCE=$(echo "$PKG" | sed 's/-/_/g')_force
 	if (printenv $PKG_FORCE > /dev/null)
