@@ -108,7 +108,7 @@ _pkg_fetch ()
 	mkdir -p "$BASEDIR/work/pkg"
 	if [ "$PKG_TYPE" = "git" ]
 	then
-		git clone --bare "$PKG_URL" "$PKG_GIT" || rm -rf "$PKG_GIT"
+		git clone --mirror "$PKG_URL" "$PKG_GIT" || rm -rf "$PKG_GIT"
 		_pkg_git_verify || rm -rf "$PKG_GIT"
 	else
 		curl -L -k -o "$PKG_SOURCE.tmp" "$PKG_URL"
@@ -172,8 +172,8 @@ pkg_download ()
 			_pkg_fetch $P
 		elif ! _pkg_git_verify
 		then
-			(cd "$PKG_GIT"; git fetch "$PKG_URL";
-			 git fetch --tags "$PKG_URL"; _pkg_git_verify)
+			(cd "$PKG_GIT"; git remote set-url origin "$PKG_URL";
+			 git fetch --prune --tags; _pkg_git_verify)
 		fi
 	elif [ ! -e "$PKG_SOURCE" ]
 	then
