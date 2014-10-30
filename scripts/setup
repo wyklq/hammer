@@ -96,7 +96,8 @@ _pkg_info ()
 _pkg_git_verify ()
 {
 	if ! (cd "$PKG_GIT"; git rev-parse --quiet --verify \
-	      "$PKG_VERSION^{commit}")
+	      "$PKG_VERSION^{commit}" &&
+	      git diff --quiet "$PKG_VERSION..$PKG_SHA1")
 	then
 		echo "$0: $PKG_VERSION missing/corrupted in $PKG_GIT"
 		return 1
