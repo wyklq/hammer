@@ -28,7 +28,7 @@ then
 		if [ "$BUILD_DEPENDS" = "utils" ]
 		then
 			SUBSYSDEP="../work/host/utils/build/.modified"
-		else 
+		else
 			SUBSYSDEP="../work/$HW_ARCH/$DEP/build/.modified"
 		fi
 	done
