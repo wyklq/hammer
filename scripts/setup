@@ -395,17 +395,14 @@ pkg_install_script ()
 		exit 1
 	fi
 	SCRIPT=`echo "usr/lib/pkg/install.d/$PKG_BUILD_NAME" | sed 's/-$//'`
-	TMP_SCRIPT=`mktemp`
-	echo 'cat << EOF > "$PKG_INSTALL_DIR/$SCRIPT"' > "$TMP_SCRIPT"
-	echo '#!/bin/sh' >> "$TMP_SCRIPT"
-	echo 'echo Installing $PKG_BUILD_NAME$PKG_VERSION...' >> "$TMP_SCRIPT"
-	grep '^# install: ' "$BUILD_SCRIPT" | sed 's/.*: //' >> "$TMP_SCRIPT"
-	echo "EOF" >> "$TMP_SCRIPT"
 	mkdir -p "$PKG_INSTALL_DIR/usr/lib/pkg/install.d"
-	. "$TMP_SCRIPT"
+	cat <<- EOF > "$PKG_INSTALL_DIR/$SCRIPT"
+	#!/bin/sh
+	echo Installing $PKG_BUILD_NAME$PKG_VERSION...
+	EOF
+	cat >> "$PKG_INSTALL_DIR/$SCRIPT"
 	chmod 755 "$PKG_INSTALL_DIR/$SCRIPT"
 	echo "$SCRIPT" >> "$PKG_INSTALL_FILES"
-	rm "$TMP_SCRIPT"
 }
 
 pkg_replace ()
