@@ -309,7 +309,7 @@ pkg_unpack_shared ()
 _pkg_install_files ()
 {
 	(cd "$PKG_STAGING"; find $(echo $1) -type f -o -type l | \
-		sed 's/^\.\/\/*//;s/\/\/*/\//g' | sort | uniq | \
+		sed 's/^\.\/\/*//;s/\/\/*/\//g' | sort -u | \
 		grep -v '^\.files$' > .files)
 	(cd "$PKG_STAGING"; tar cf - -T .files --remove-files) | \
 		(cd "$PKG_INSTALL_DIR"; tar xfp -)
