@@ -35,11 +35,11 @@
 
         <package name>_sources
             Specifies a directory that overrides a package source code from
-            the content defined in upstream/packages. This is mainly useful
-            when developing new patches against a package (by modifying its
-            source tree) or when trying out a new version of a package or
-            while bisecting a package etc. Using this option very likely
-            results in a nonreproducible build.
+            the content defined by PKG_URL. This is mainly useful when
+            developing new patches against a package (by modifying its source
+            tree) or when trying out a new version of a package or while
+            bisecting a package etc. Using this option very likely results in a
+            nonreproducible build.
 
 
     At this time, there is no more documentation available, sorry.

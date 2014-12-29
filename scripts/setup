@@ -45,30 +45,7 @@ pkg_patch ()
 
 _pkg_info ()
 {
-	if [ -z "$PKG_URL" ]
-	then
-		PKG_DATA=`awk ' { if ($1 == "'$P'") { print $0; exit } } ' \
-			  "$BASEDIR/upstream/packages"`
-		if [ -z "$PKG_DATA" ]
-		then
-			echo "$0: upstream location of package $P missing"
-			exit 1
-		fi
-		PKG_URL=`echo $PKG_DATA | awk ' { print $2 } '`
-		PKG_TYPE=`echo $PKG_DATA | awk ' { print $3 } '`
-		PKG_HASH=`echo $PKG_DATA | awk ' { print $4 } '`
-		if [ "$PKG_TYPE" = "git" ]
-		then
-			PKG_SHA1="$PKG_HASH"
-		else
-			PKG_MD5="$PKG_HASH"
-		fi
-	fi
-	if [ -z "$PKG_URL" ]
-	then
-		echo "PKG_URL for package $P is not defined."
-		exit 1
-	elif ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
+	if ! (echo "$PKG_URL" | grep -q '^[a-z][a-z]*://')
 	then
 		if [ "$PKG_TYPE" = "git" ]
 		then
@@ -137,7 +114,7 @@ _pkg_copy ()
 pkg_download ()
 {
 	P=$PKG
-	if [ ! -e "$BASEDIR/upstream/packages" ]
+	if [ -z "$PKG_URL" ]
 	then
 		if [ -z "$PKG_FILENAME" ]
 		then
@@ -163,7 +140,9 @@ pkg_download ()
 		echo "$0: PKG not defined"
 		exit 1
 	fi
-	exec 9<"$BASEDIR/upstream/packages"
+	LOCK="$BASEDIR/work/.download.$PKG_TYPE.lock"
+	touch "$LOCK"
+	exec 9<"$LOCK"
 	flock -x 9
 	PKG_GIT=`echo "$BASEDIR/work/git/$PKG_NAME" | sed 's/-$//'`
 	if [ "$PKG_TYPE" = "git" ]
